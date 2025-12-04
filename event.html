@@ -173,6 +173,37 @@
         color: white;
       }
 
+      .capacity-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f8f9ff;
+        padding: 12px 14px;
+        border-radius: 12px;
+        margin: 10px 0 5px;
+        border: 1px solid #e5e7ff;
+      }
+
+      .capacity-label {
+        font-weight: 600;
+        color: #4a5568;
+      }
+
+      .capacity-value {
+        font-weight: 700;
+        color: #667eea;
+      }
+
+      .capacity-value.sold-out {
+        color: #e53e3e;
+      }
+
+      .registration-status {
+        margin: 8px 0 0;
+        color: #4a5568;
+        font-size: 0.95rem;
+      }
+
       #map-container {
         width: 100%;
         height: 300px;
@@ -247,7 +278,8 @@
       <nav class="tm-links">
         <a href="index.html">Home</a>
         <a href="favorites.html" id="favorites-link">Favorites</a>
-        <a href="profile.html" id="profile-link">Profile</a>
+        <a href="registrations.html" id="registrations-link">My Registrations</a>
+        <a href="account.html" id="profile-link">Profile</a>
         <a href="admin.html" id="admin-link" style="display: none">Admin</a>
       </nav>
     </header>
@@ -325,6 +357,11 @@
               <h3>🎟️ Tickets & Registration</h3>
               <div class="price-display" id="ticket-price">$0.00</div>
               <p id="ticket-info">Get your tickets now!</p>
+              <div class="capacity-row" id="capacity-row" style="display: none">
+                <span class="capacity-label">Spots left</span>
+                <span class="capacity-value" id="capacity-value">—</span>
+              </div>
+              <p class="registration-status" id="registration-status"></p>
               <button id="register-btn">🎫 Register Now</button>
               <button id="favorite-btn">♡ Add to Favorites</button>
             </div>
@@ -368,6 +405,7 @@
       let currentUser = null;
       let currentEvent = null;
       let isFavorited = false;
+      let registrationState = null;
 
       // Initialize after DOM loads
       window.addEventListener("DOMContentLoaded", async () => {
@@ -385,6 +423,9 @@
                 await loadCurrentUser(firebaseUser);
                 updateUIForLoggedIn();
                 await checkIfFavorited();
+                if (currentEvent) {
+                  await loadRegistrationStatus();
+                }
               } else {
                 // not signed in - still load event
               }
@@ -412,6 +453,9 @@
       }
 
       function updateUIForLoggedIn() {
+        document.getElementById("favorites-link").style.display = "inline";
+        document.getElementById("registrations-link").style.display = "inline";
+        document.getElementById("profile-link").style.display = "inline";
         if (currentUser && ["admin", "owner"].includes(currentUser.role)) {
           document.getElementById("admin-link").style.display = "block";
         }
@@ -427,6 +471,11 @@
           if (data.success && data.event) {
             currentEvent = data.event;
             renderEvent();
+            if (currentUser) {
+              await loadRegistrationStatus();
+            } else {
+              updateCapacityUI();
+            }
           } else {
             showError("Event not found");
           }
@@ -453,8 +502,8 @@
                 event.id || eventId
               )}`;
         document.getElementById("event-main-image").src = imageUrl;
-        document.getElementById("event-title").textContent =
-          event.title || "Untitled Event";
+        const displayName = event.name || event.title || "Untitled Event";
+        document.getElementById("event-title").textContent = displayName;
         document.getElementById("event-subtitle").textContent = `${
           event.location || "Location TBA"
         } • ${event.date || "Date TBA"}${event.time ? " • " + event.time : ""}`;
@@ -497,13 +546,13 @@
           event.status || "Published";
 
         // Creator info
-        if (event.creator_name) {
+        const creatorName = event.owner_name || event.creator_name;
+        if (creatorName) {
           const createdAt = event.created_at
             ? new Date(event.created_at).toLocaleDateString()
             : "-";
           document.getElementById("creator-info").style.display = "block";
-          document.getElementById("creator-name").textContent =
-            event.creator_name;
+          document.getElementById("creator-name").textContent = creatorName;
           document.getElementById("created-date").textContent = createdAt;
         }
 
@@ -519,9 +568,7 @@
         registerBtn.replaceWith(registerBtn.cloneNode(true));
         document
           .getElementById("register-btn")
-          .addEventListener("click", () => {
-            alert("Registration functionality coming soon!");
-          });
+          .addEventListener("click", handleRegistration);
 
         const favoriteBtn = document.getElementById("favorite-btn");
         favoriteBtn.replaceWith(favoriteBtn.cloneNode(true));
@@ -530,7 +577,10 @@
           .addEventListener("click", toggleFavorite);
 
         // Update page title
-        document.title = `${event.title || "Event"} | Event Finder`;
+        document.title = `${displayName} | Event Finder`;
+
+        updateCapacityUI();
+        updateRegisterButton();
       }
 
       async function checkIfFavorited() {
@@ -550,6 +600,163 @@
           }
         } catch (error) {
           console.error("Failed to check favorites:", error);
+        }
+      }
+
+      async function loadRegistrationStatus() {
+        if (!currentUser || !eventId) return;
+
+        try {
+          const firebaseUser = window.firebaseAuth.currentUser;
+          const response = await fetch(
+            `/web-proj/api/registrations.php?event_id=${encodeURIComponent(
+              eventId
+            )}`,
+            {
+              headers: { "X-Firebase-UID": firebaseUser.uid },
+            }
+          );
+          const data = await response.json();
+          if (response.ok && data.success && data.registration) {
+            registrationState = data.registration;
+          } else {
+            registrationState = null;
+          }
+          updateRegisterButton();
+        } catch (error) {
+          console.error("Failed to load registration status", error);
+        }
+      }
+
+      function updateCapacityUI() {
+        const capacityRow = document.getElementById("capacity-row");
+        const capacityValue = document.getElementById("capacity-value");
+        if (!currentEvent || !capacityRow || !capacityValue) return;
+
+        const capacity = parseInt(currentEvent.capacity, 10) || 0;
+        const remaining =
+          currentEvent.available_spots === null ||
+          typeof currentEvent.available_spots === "undefined"
+            ? null
+            : parseInt(currentEvent.available_spots, 10);
+
+        if (!capacity) {
+          capacityRow.style.display = "none";
+          return;
+        }
+
+        capacityRow.style.display = "flex";
+
+        const soldOut = remaining !== null && remaining <= 0;
+        capacityValue.textContent = soldOut
+          ? "Sold out"
+          : `${remaining ?? capacity}/${capacity} left`;
+        capacityValue.classList.toggle("sold-out", soldOut);
+
+        if (soldOut) {
+          setRegistrationStatus(
+            "This event is currently sold out. Spots may open if someone cancels.",
+            true
+          );
+        }
+      }
+
+      function setRegistrationStatus(message, isAlert = false) {
+        const statusEl = document.getElementById("registration-status");
+        if (!statusEl) return;
+        statusEl.textContent = message || "";
+        statusEl.style.color = isAlert ? "#e53e3e" : "#4a5568";
+      }
+
+      function updateRegisterButton() {
+        const btn = document.getElementById("register-btn");
+        if (!btn) return;
+
+        const capacity = parseInt(currentEvent?.capacity || 0, 10);
+        const remaining =
+          currentEvent &&
+          currentEvent.available_spots !== null &&
+          typeof currentEvent.available_spots !== "undefined"
+            ? parseInt(currentEvent.available_spots, 10)
+            : null;
+
+        const soldOut = capacity > 0 && remaining !== null && remaining <= 0;
+
+        if (registrationState?.status === "registered") {
+          btn.textContent = "✅ Registered";
+          btn.disabled = true;
+          setRegistrationStatus("You're all set for this event!");
+          return;
+        }
+
+        if (soldOut) {
+          btn.textContent = "Sold Out";
+          btn.disabled = true;
+          setRegistrationStatus(
+            "This event is currently sold out. Spots may open if someone cancels.",
+            true
+          );
+          return;
+        }
+
+        btn.textContent = "🎫 Register Now";
+        btn.disabled = false;
+        setRegistrationStatus("");
+      }
+
+      async function handleRegistration() {
+        if (!currentEvent) return;
+
+        if (!currentUser) {
+          alert("Please log in to register for events");
+          window.location.href = "/web-proj/login.html";
+          return;
+        }
+
+        const btn = document.getElementById("register-btn");
+        const originalText = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = "Processing...";
+
+        try {
+          const firebaseUser = window.firebaseAuth.currentUser;
+          const response = await fetch("/web-proj/api/registrations.php", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Firebase-UID": firebaseUser.uid,
+            },
+            body: JSON.stringify({ event_id: parseInt(eventId, 10) }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok || !data.success) {
+            throw new Error(data.error || "Registration failed");
+          }
+
+          registrationState = {
+            id: data.registration_id,
+            status: data.status,
+            event_id: parseInt(eventId, 10),
+          };
+
+          if (
+            typeof data.remaining_spots !== "undefined" &&
+            data.remaining_spots !== null
+          ) {
+            currentEvent.available_spots = data.remaining_spots;
+          }
+
+          updateCapacityUI();
+          updateRegisterButton();
+
+          window.location.href = `/web-proj/confirmation.html?registration_id=${data.registration_id}&event_id=${eventId}`;
+        } catch (error) {
+          console.error("Registration error", error);
+          alert(error.message || "Unable to register for this event");
+          btn.disabled = false;
+          btn.textContent = originalText;
         }
       }
 

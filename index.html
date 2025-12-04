@@ -98,6 +98,35 @@
         background: #ff5252;
       }
 
+      .capacity-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        background: #eef2ff;
+        color: #4c51bf;
+        font-weight: 600;
+        font-size: 0.85rem;
+      }
+
+      .capacity-chip.sold-out {
+        background: #fff5f5;
+        color: #e53e3e;
+      }
+
+      .registration-flag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 10px;
+        background: #e6fffa;
+        color: #0f766e;
+        font-weight: 700;
+        font-size: 0.85rem;
+      }
+
       .loading-spinner {
         text-align: center;
         padding: 60px;
@@ -165,6 +194,12 @@
           <a href="index.html" class="active">Home</a>
           <a href="favorites.html" id="favorites-link" style="display: none"
             >Favorites</a
+          >
+          <a
+            href="registrations.html"
+            id="registrations-link"
+            style="display: none"
+            >My Registrations</a
           >
           <a href="account.html" id="profile-link" style="display: none"
             >Account</a
@@ -304,6 +339,7 @@
       let allEvents = [];
       let allGenres = [];
       let userFavorites = [];
+      let userRegistrations = [];
       let currentUser = null;
       let selectedGenre = "";
       let userLocation = null;
@@ -314,6 +350,7 @@
             await loadCurrentUser(firebaseUser);
             updateUIForLoggedIn();
             await loadFavorites();
+            await loadRegistrations();
           } else {
             updateUIForLoggedOut();
           }
@@ -341,6 +378,7 @@
         document.getElementById("login-btn").style.display = "none";
         document.getElementById("user-menu").style.display = "block";
         document.getElementById("favorites-link").style.display = "block";
+        document.getElementById("registrations-link").style.display = "block";
         document.getElementById("profile-link").style.display = "block";
         if (currentUser) {
           const avatar = document.getElementById("user-avatar");
@@ -358,8 +396,10 @@
         document.getElementById("login-btn").style.display = "block";
         document.getElementById("user-menu").style.display = "none";
         document.getElementById("favorites-link").style.display = "none";
+        document.getElementById("registrations-link").style.display = "none";
         document.getElementById("profile-link").style.display = "none";
         document.getElementById("admin-link").style.display = "none";
+        document.getElementById("admin-badge").style.display = "none";
       }
 
       // Load genres from API
@@ -442,6 +482,14 @@
             ? `$${parseFloat(event.price).toFixed(2)}`
             : "FREE";
         const isFavorited = userFavorites.includes(Number(event.id));
+        const isRegistered = userRegistrations.includes(Number(event.id));
+        const capacity = parseInt(event.capacity || 0, 10);
+        const remaining =
+          event.available_spots === null ||
+          typeof event.available_spots === "undefined"
+            ? null
+            : parseInt(event.available_spots, 10);
+        const soldOut = capacity > 0 && remaining !== null && remaining <= 0;
         const imageUrl =
           event.image_url ||
           "https://placehold.co/400x200/667eea/white?text=Event";
@@ -464,6 +512,13 @@
 
         const h4 = document.createElement("h4");
         h4.textContent = title;
+
+        let registrationFlag = null;
+        if (isRegistered) {
+          registrationFlag = document.createElement("div");
+          registrationFlag.className = "registration-flag";
+          registrationFlag.textContent = "Already registered";
+        }
 
         const infoP = document.createElement("p");
         infoP.className = "event-info";
@@ -508,11 +563,21 @@
         // append children
         card.appendChild(preview);
         card.appendChild(h4);
+        if (registrationFlag) card.appendChild(registrationFlag);
         card.appendChild(infoP);
         if (distance) {
           const ddiv = document.createElement("div");
           ddiv.innerHTML = distance;
           card.appendChild(ddiv);
+        }
+
+        if (capacity) {
+          const capacityChip = document.createElement("span");
+          capacityChip.className = "capacity-chip" + (soldOut ? " sold-out" : "");
+          capacityChip.textContent = soldOut
+            ? "Sold out"
+            : `${remaining ?? capacity} spots left`;
+          card.appendChild(capacityChip);
         }
         card.appendChild(genresDiv);
         card.appendChild(actionsDiv);
@@ -553,6 +618,26 @@
             qs.append("genre", selectedGenre);
           }
 
+          // Search query (header or hero search bar)
+          const searchInput =
+            document.getElementById("search-input")?.value || "";
+          const headerSearch =
+            document.getElementById("header-search")?.value || "";
+          const locationSearch =
+            document.getElementById("filter-location")?.value || "";
+          const searchQuery = [
+            searchInput.trim(),
+            headerSearch.trim(),
+            locationSearch.trim(),
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .trim();
+
+          if (searchQuery) {
+            qs.append("search", searchQuery);
+          }
+
           // Location filter (geolocation)
           if (
             userLocation &&
@@ -566,6 +651,40 @@
             const radiusInput = document.getElementById("filter-radius");
             const radius = radiusInput?.value || "50";
             qs.append("radius", radius);
+          }
+
+          // Date filter (exact day)
+          const dateInput = document.getElementById("filter-date");
+          if (dateInput?.value) {
+            qs.append("date_from", dateInput.value);
+            qs.append("date_to", dateInput.value);
+          }
+
+          // Price filter (max price)
+          const priceInput = document.getElementById("filter-price");
+          if (priceInput?.value !== "") {
+            const priceValue = parseFloat(priceInput.value);
+            if (!Number.isNaN(priceValue)) {
+              qs.append("price_max", priceValue.toString());
+            }
+          }
+
+          // Sort options (map to API sort/order)
+          const sortSelect = document.getElementById("filter-sort");
+          const sortValue = sortSelect?.value || "";
+
+          if (sortValue === "price-low") {
+            qs.append("sort", "price");
+            qs.append("order", "ASC");
+          } else if (sortValue === "price-high") {
+            qs.append("sort", "price");
+            qs.append("order", "DESC");
+          } else if (sortValue === "name") {
+            qs.append("sort", "name");
+            qs.append("order", "ASC");
+          } else {
+            qs.append("sort", "date");
+            qs.append("order", "ASC");
           }
 
           if ([...qs].length > 0) {
@@ -590,9 +709,6 @@
           if (data && data.success && Array.isArray(data.events)) {
             allEvents = data.events;
 
-            // Apply client-side filters
-            applyFilters();
-
             // Update heading
             if (selectedGenre) {
               const genre = allGenres.find((g) => g.slug === selectedGenre);
@@ -602,10 +718,16 @@
             } else if (allEvents.length > 0 && allEvents[0].distance_km) {
               document.getElementById("events-heading").textContent =
                 "Nearby Events";
+            } else if (searchQuery) {
+              document.getElementById("events-heading").textContent =
+                "Search Results";
             } else {
               document.getElementById("events-heading").textContent =
                 "All Events";
             }
+
+            // Render events (sorted server-side)
+            renderEvents();
           } else {
             throw new Error("Failed to load events");
           }
@@ -616,60 +738,6 @@
         }
       }
 
-      // Apply client-side filters
-      function applyFilters() {
-        let filtered = [...allEvents];
-
-        // Date filter
-        const dateInput = document.getElementById("filter-date");
-        if (dateInput?.value) {
-          const filterDate = dateInput.value;
-          filtered = filtered.filter((event) => event.date === filterDate);
-        }
-
-        // Location text search
-        const locationInput = document.getElementById("filter-location");
-        if (locationInput?.value) {
-          const searchTerm = locationInput.value.toLowerCase();
-          filtered = filtered.filter((event) =>
-            event.location?.toLowerCase().includes(searchTerm)
-          );
-        }
-
-        // Price filter
-        const priceInput = document.getElementById("filter-price");
-        if (priceInput?.value) {
-          const maxPrice = parseFloat(priceInput.value);
-          filtered = filtered.filter((event) => {
-            const eventPrice = parseFloat(event.price) || 0;
-            return eventPrice <= maxPrice;
-          });
-        }
-
-        // Sort
-        const sortSelect = document.getElementById("filter-sort");
-        const sortBy = sortSelect?.value;
-
-        if (sortBy === "date") {
-          filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
-        } else if (sortBy === "price-low") {
-          filtered.sort(
-            (a, b) => (parseFloat(a.price) || 0) - (parseFloat(b.price) || 0)
-          );
-        } else if (sortBy === "price-high") {
-          filtered.sort(
-            (a, b) => (parseFloat(b.price) || 0) - (parseFloat(a.price) || 0)
-          );
-        } else if (sortBy === "name") {
-          filtered.sort((a, b) =>
-            (a.title || a.name || "").localeCompare(b.title || b.name || "")
-          );
-        }
-
-        // Update the display
-        allEvents = filtered;
-        renderEvents();
-      }
       // Load user favorites
       async function loadFavorites() {
         if (!currentUser) return;
@@ -683,6 +751,25 @@
             userFavorites = data.favorites.map((f) => Number(f.id));
         } catch (error) {
           console.error("Failed to load favorites:", error);
+        }
+      }
+
+      async function loadRegistrations() {
+        if (!currentUser) return;
+        try {
+          const firebaseUser = auth.currentUser;
+          const response = await fetch("/web-proj/api/registrations.php", {
+            headers: { "X-Firebase-UID": firebaseUser.uid },
+          });
+          const data = await response.json();
+          if (data.success) {
+            userRegistrations = data.registrations
+              .filter((r) => r.status === "registered")
+              .map((r) => Number(r.event_id));
+            renderEvents();
+          }
+        } catch (error) {
+          console.error("Failed to load registrations:", error);
         }
       }
 
@@ -760,35 +847,7 @@
 
       // Search (renders filtered view, doesn't overwrite allEvents)
       function searchEvents() {
-        const q1 = document.getElementById("search-input")?.value || "";
-        const q2 = document.getElementById("header-search")?.value || "";
-        const query = (q1 || q2).trim();
-
-        if (!query) {
-          renderEvents();
-          return;
-        }
-
-        const filtered = allEvents.filter(
-          (event) =>
-            (event.name || event.title || "")
-              .toLowerCase()
-              .includes(query.toLowerCase()) ||
-            (event.description || "")
-              .toLowerCase()
-              .includes(query.toLowerCase()) ||
-            (event.location || "").toLowerCase().includes(query.toLowerCase())
-        );
-
-        const container = document.getElementById("events-container");
-        if (filtered.length === 0) {
-          container.innerHTML =
-            '<div class="no-events"><h3>😕 No events found</h3><p>Try adjusting your search or filters</p></div>';
-          return;
-        }
-
-        container.innerHTML = "";
-        filtered.forEach((e) => container.appendChild(createEventCard(e)));
+        loadEvents();
       }
 
       // Setup event listeners
@@ -828,7 +887,7 @@
           .getElementById("filter-form")
           .addEventListener("submit", (e) => {
             e.preventDefault();
-            applyFilters();
+            loadEvents();
           });
 
         document
