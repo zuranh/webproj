@@ -284,11 +284,14 @@
           const response = await adminAuth.apiRequest("/api/admin/users.php");
           const data = await response.json();
 
-          if (data.success) {
+          if (data.success && Array.isArray(data.users)) {
             allUsers = data.users;
             renderUsers();
-            updateStats();
+            updateStats(data.count);
+            return;
           }
+
+          showAlert(data.error || "Failed to load users", "error");
         } catch (error) {
           console.error("Failed to load users:", error);
           showAlert("Failed to load users", "error");
@@ -443,8 +446,8 @@
       }
 
       // Update statistics
-      function updateStats() {
-        const total = allUsers.length;
+      function updateStats(totalFromApi) {
+        const total = totalFromApi ?? allUsers.length;
         const owners = allUsers.filter((u) => u.role === "owner").length;
         const admins = allUsers.filter((u) => u.role === "admin").length;
         const users = allUsers.filter((u) => u.role === "user").length;

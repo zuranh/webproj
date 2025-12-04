@@ -33,12 +33,59 @@
     <!-- MAIN CONTENT -->
     <div class="content">
       <header class="page-header">
-        <h1>Page Title</h1>
-        <p>Page subtitle or explanation.</p>
+        <h1>Admin Dashboard</h1>
+        <p>Overview of users, events, and registrations.</p>
       </header>
 
-      <!-- PAGE CONTENT GOES HERE -->
-      <div id="page-container"></div>
+      <!-- DASHBOARD STATS -->
+      <section id="dashboard-stats" class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-number" id="stat-users">0</div>
+          <div class="stat-meta" id="stat-users-meta">loading…</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Admins</div>
+          <div class="stat-number" id="stat-admins">0</div>
+          <div class="stat-meta" id="stat-admins-meta">loading…</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Events</div>
+          <div class="stat-number" id="stat-events">0</div>
+          <div class="stat-meta" id="stat-events-meta">loading…</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Registrations</div>
+          <div class="stat-number" id="stat-registrations">0</div>
+          <div class="stat-meta" id="stat-registrations-meta">loading…</div>
+        </div>
+      </section>
+
+      <!-- RECENT ACTIVITY -->
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h3>Recent Events</h3>
+            <p class="muted">Latest events you or your admins created.</p>
+          </div>
+          <a href="edit-events.html" class="btn-link">Manage events →</a>
+        </header>
+        <div id="recent-events" class="list" aria-live="polite">Loading…</div>
+      </section>
+
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h3>Admin Tips</h3>
+            <p class="muted">Use the admin tools to add/edit events and manage users.</p>
+          </div>
+        </header>
+        <ul class="list bullets">
+          <li>Need another admin? Owners can promote users from the Admin Users page.</li>
+          <li>Use Add Events to publish new events (past or future) with capacity tracking.</li>
+          <li>Edit Events lets you adjust capacity/availability or archive outdated listings.</li>
+        </ul>
+      </section>
 
       <footer class="footer">
         <p>© 2025 Eventify Admin</p>
@@ -54,13 +101,62 @@
       // Initialize admin authentication
       adminAuth
         .init()
-        .then((user) => {
-          console.log("Admin authenticated:", user);
+        .then(() => {
           adminAuth.updateUIForRole();
+          loadDashboard();
         })
         .catch((error) => {
           console.error("Auth failed:", error);
         });
+
+      async function loadDashboard() {
+        try {
+          const response = await adminAuth.apiRequest("/api/admin/dashboard.php");
+          const data = await response.json();
+
+          if (!data.success) {
+            throw new Error(data.error || "Failed to load dashboard data");
+          }
+
+          document.getElementById("stat-users").textContent = data.stats.total_users;
+          document.getElementById("stat-admins").textContent = data.stats.admins;
+          document.getElementById("stat-events").textContent = data.stats.events;
+          document.getElementById("stat-registrations").textContent = data.stats.registrations;
+
+          document.getElementById("stat-users-meta").textContent = `${data.stats.owners} owner(s), ${data.stats.active_users} active`;
+          document.getElementById("stat-admins-meta").textContent = `${data.stats.admins} admin(s) • ${data.stats.owners} owner(s)`;
+          document.getElementById("stat-events-meta").textContent = `${data.stats.published_events} published, ${data.stats.draft_events} draft`;
+          document.getElementById("stat-registrations-meta").textContent = `${data.stats.upcoming_registrations} upcoming, ${data.stats.past_registrations} past/cancelled`;
+
+          renderRecentEvents(data.recent_events || []);
+        } catch (error) {
+          console.error(error);
+          document.getElementById("recent-events").textContent = "Unable to load dashboard data.";
+        }
+      }
+
+      function renderRecentEvents(events) {
+        const container = document.getElementById("recent-events");
+        if (!events.length) {
+          container.textContent = "No events yet. Use Add Events to create one.";
+          return;
+        }
+
+        container.innerHTML = "";
+        events.slice(0, 5).forEach((event) => {
+          const row = document.createElement("div");
+          row.className = "list-row";
+          const dateStr = event.date ? new Date(event.date).toLocaleDateString() : "TBD";
+          row.innerHTML = `
+            <div>
+              <strong>${event.name}</strong>
+              <div class="muted">${dateStr} • ${event.status}</div>
+            </div>
+            <div class="muted">${event.owner_name || "Admin"}</div>
+          `;
+          container.appendChild(row);
+        });
+      }
     </script>
   </body>
 </html>

@@ -355,6 +355,13 @@
           btnLoader.style.display = "inline";
 
           // Collect form data
+          const rawCapacity = document.getElementById("capacity").value;
+          const rawAvailable = document.getElementById("available_spots").value;
+
+          const capacity = rawCapacity === "" ? 0 : Number(rawCapacity);
+          const availableSpots =
+            rawAvailable === "" ? capacity : Number(rawAvailable);
+
           const formData = {
             title: document.getElementById("title").value,
             description: document.getElementById("description").value,
@@ -366,11 +373,8 @@
             age_restriction:
               document.getElementById("age_restriction").value || null,
             price: document.getElementById("price").value || 0,
-            capacity: document.getElementById("capacity").value || 0,
-            available_spots:
-              document.getElementById("available_spots").value ||
-              document.getElementById("capacity").value ||
-              0,
+            capacity,
+            available_spots: availableSpots,
             image_url: document.getElementById("image_url").value || null,
             status: document.querySelector('input[name="status"]:checked')
               .value,
@@ -404,8 +408,8 @@
 
             const data = await response.json();
 
-            if (data.success) {
-              showAlert("Event created successfully!  ", "success");
+            if (response.ok && data.success) {
+              showAlert("Event created successfully!", "success");
               // Reset form after 2 seconds
               setTimeout(() => {
                 document.getElementById("add-event-form").reset();
@@ -415,9 +419,12 @@
                 document
                   .querySelectorAll(".status-option")[0]
                   .classList.add("selected");
-              }, 2000);
+              }, 1200);
             } else {
-              showAlert(data.error || "Failed to create event", "error");
+              showAlert(
+                data.error || "Failed to create event. Please check the form.",
+                "error"
+              );
             }
           } catch (error) {
             console.error("Error creating event:", error);
