@@ -436,7 +436,7 @@
                     <p class="event-card-info">📍 ${
                       event.location || "No location"
                     }</p>
-                    <p class="event-card-info">💰 $${event.price || "0. 00"}</p>
+                    <p class="event-card-info">💰 $${event.price || "0.00"}</p>
                     <div class="event-genres">
                         ${(event.genres || [])
                           .map((g) => `<span class="genre-tag">${g}</span>`)
@@ -444,20 +444,20 @@
                     </div>
                 `;
 
-          card.addEventListener("click", () => selectEvent(event));
+          card.addEventListener("click", () => selectEvent(event, card));
           grid.appendChild(card);
         });
       }
 
       // Select event for editing
-      function selectEvent(event) {
+      function selectEvent(event, cardEl) {
         selectedEvent = event;
 
         // Update UI
         document
           .querySelectorAll(".event-card")
           .forEach((card) => card.classList.remove("selected"));
-        event.target?.classList?.add("selected");
+        cardEl?.classList?.add("selected");
 
         // Show form
         document.getElementById("edit-form").classList.add("active");
@@ -491,12 +491,10 @@
         const container = document.getElementById("genre-selection");
         container.innerHTML = "";
 
-        // Get event's current genre IDs from the genres array
-        // We need to match genre names to IDs since the API returns names
-        const eventGenreNames = event.genres || [];
+        const eventGenreIds = event.genre_ids || [];
 
         availableGenres.forEach((genre) => {
-          const isSelected = eventGenreNames.includes(genre.name);
+          const isSelected = eventGenreIds.includes(genre.id);
 
           const label = document.createElement("label");
           label.className = `genre-option ${isSelected ? "selected" : ""}`;
@@ -555,7 +553,7 @@
 
           try {
             const response = await adminAuth.apiRequest(
-              `/api/admin/events. php? id=${selectedEvent.id}`,
+              `/api/admin/events.php?id=${selectedEvent.id}`,
               {
                 method: "PUT",
                 body: JSON.stringify(formData),
