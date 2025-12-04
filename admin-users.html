@@ -194,7 +194,7 @@
         <a class="nav-link" href="admin.html">Admin profile</a>
         <a class="nav-link active" href="admin-users.html">Admin Users</a>
         <a class="nav-link" href="addEvents.html">Add Events</a>
-        <a class="nav-link" href="edit-events. html">Edit Events</a>
+        <a class="nav-link" href="edit-events.html">Edit Events</a>
         <a class="nav-link" href="index.html">Home</a>
       </nav>
     </aside>
@@ -205,6 +205,15 @@
       <header class="page-header">
         <h1>User Management</h1>
         <p>View and manage all registered users (Owner only)</p>
+
+        <div class="info-card" style="margin-top: 12px;">
+          <strong>Owner login tips:</strong>
+          <ul style="margin: 8px 0 0 18px; color: #555;">
+            <li>Sign up or log in with the seeded owner email <code>owner@example.com</code> in Firebase.</li>
+            <li>After signing in, the login/signup flow calls <code>/api/sync-user.php</code> to link your Firebase UID to the owner row.</li>
+            <li>Once linked, open this page to promote/demote admins; only owners can change roles.</li>
+          </ul>
+        </div>
       </header>
 
       <div id="alert-container"></div>
@@ -272,7 +281,7 @@
       // Load all users
       async function loadUsers() {
         try {
-          const response = await adminAuth.apiRequest("/api/admin/users. php");
+          const response = await adminAuth.apiRequest("/api/admin/users.php");
           const data = await response.json();
 
           if (data.success) {
@@ -380,7 +389,7 @@
 
         try {
           const response = await adminAuth.apiRequest(
-            `/api/admin/users. php?id=${userId}`,
+            `/api/admin/users.php?id=${userId}`,
             {
               method: "PUT",
               body: JSON.stringify({ role: newRole }),
@@ -412,7 +421,7 @@
 
         try {
           const response = await adminAuth.apiRequest(
-            `/api/admin/users. php?id=${userId}`,
+            `/api/admin/users.php?id=${userId}`,
             {
               method: "PUT",
               body: JSON.stringify({ is_active: newStatus }),
