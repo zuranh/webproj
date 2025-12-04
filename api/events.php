@@ -22,7 +22,7 @@ try {
 
     if (isset($_GET['id'])) {
         $stmt = $db->prepare('
-            SELECT e.*, g. name as genre_name, g. slug as genre_slug, g. icon as genre_icon, u. name as owner_name
+            SELECT e.*, g.name as genre_name, g.slug as genre_slug, g.icon as genre_icon, u.name as owner_name
             FROM events e
             LEFT JOIN genres g ON e.genre_id = g.id
             LEFT JOIN users u ON e.owner_id = u.id
@@ -75,7 +75,7 @@ try {
     }
     
     if (isset($_GET['price_max'])) {
-        $where[] = "e. price <= :price_max";
+        $where[] = "e.price <= :price_max";
         $params[':price_max'] = $_GET['price_max'];
     }
     
@@ -96,7 +96,7 @@ try {
     $countStmt = $db->prepare("
         SELECT COUNT(*) as total 
         FROM events e
-        LEFT JOIN genres g ON e. genre_id = g.id
+        LEFT JOIN genres g ON e.genre_id = g.id
         WHERE $whereClause
     ");
     $countStmt->execute($params);
@@ -105,8 +105,8 @@ try {
     $stmt = $db->prepare("
         SELECT e.*, g.name as genre_name, g.slug as genre_slug, g.icon as genre_icon, u.name as owner_name
         FROM events e
-        LEFT JOIN genres g ON e. genre_id = g.id
-        LEFT JOIN users u ON e. owner_id = u.id
+        LEFT JOIN genres g ON e.genre_id = g.id
+        LEFT JOIN users u ON e.owner_id = u.id
         WHERE $whereClause
         ORDER BY e.$sortField $sortOrder
         LIMIT :limit OFFSET :offset
