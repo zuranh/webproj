@@ -1,10 +1,10 @@
-<? php
+<?php
 /**
  * Admin Events API - Protected endpoint for event management
- * POST /api/admin/events.php - Create new event
- * PUT /api/admin/events.php? id=X - Update event
- * DELETE /api/admin/events.php?id=X - Delete event
- * GET /api/admin/events. php - Get all events (including drafts)
+ * POST   /api/admin/events.php      Create new event
+ * PUT    /api/admin/events.php?id=X Update event
+ * DELETE /api/admin/events.php?id=X Delete event
+ * GET    /api/admin/events.php      List all events (including drafts)
  */
 
 session_start();
@@ -13,7 +13,6 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, X-Firebase-UID');
 
-// Handle preflight
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
@@ -22,57 +21,68 @@ $db = require __DIR__ . '/../db.php';
 require_once __DIR__ . '/../auth.php';
 
 $auth = new Auth($db);
+$currentUser = $auth->requireAdmin();
 $method = $_SERVER['REQUEST_METHOD'];
 
-// Require admin authentication for all operations
-$currentUser = $auth->requireAdmin();
+// Utility: normalize title/name input
+function event_name(array $data): string
+{
+    return trim($data['title'] ?? $data['name'] ?? '');
+}
+
+// Utility: determine primary genre id
+function primary_genre_id(array $data): ?int
+{
+    if (!empty($data['genre_id'])) {
+        return (int) $data['genre_id'];
+    }
+
+    if (!empty($data['genres']) && is_array($data['genres'])) {
+        $first = reset($data['genres']);
+        return $first ? (int) $first : null;
+    }
+
+    return null;
+}
 
 // GET - Fetch all events (including drafts) for admin
 if ($method === 'GET') {
-    $stmt = $db->query("
-        SELECT e.*, 
-               u.name as creator_name,
-               GROUP_CONCAT(g.name) as genres,
-               GROUP_CONCAT(g.slug) as genre_slugs
-        FROM events e
-        LEFT JOIN users u ON e.created_by = u.id
-        LEFT JOIN event_genres eg ON e.id = eg.event_id
-        LEFT JOIN genres g ON eg.genre_id = g.id
-        GROUP BY e.id
-        ORDER BY e.created_at DESC
-    ");
-    $events = $stmt->fetchAll();
-    
-    foreach ($events as &$event) {
-        $event['genres'] = $event['genres'] ? explode(',', $event['genres']) : [];
-        $event['genre_slugs'] = $event['genre_slugs'] ? explode(',', $event['genre_slugs']) : [];
-    }
-    
+    $stmt = $db->query(
+        "SELECT e.*, u.name as owner_name
+         FROM events e
+         LEFT JOIN users u ON e.owner_id = u.id
+         ORDER BY e.created_at DESC"
+    );
+
+    $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
     echo json_encode(['success' => true, 'events' => $events]);
     exit;
 }
 
 // POST - Create new event
 if ($method === 'POST') {
-    $data = json_decode(file_get_contents('php://input'), true);
-    
-    // Validate required fields
-    if (empty($data['title'])) {
+    $data = json_decode(file_get_contents('php://input'), true) ?? [];
+
+    $name = event_name($data);
+    if ($name === '') {
         http_response_code(400);
         echo json_encode(['error' => 'Title is required']);
         exit;
     }
-    
-    // Insert event
-    $stmt = $db->prepare("
-        INSERT INTO events 
-        (title, description, location, lat, lng, date, time, age_restriction, price, image_url, status, created_by)
-        VALUES 
-        (:title, :description, :location, :lat, :lng, :date, :time, :age_restriction, :price, :image_url, :status, :created_by)
-    ");
-    
+
+    $genreId = primary_genre_id($data);
+    $status = $data['status'] ?? 'published';
+
+    $stmt = $db->prepare(
+        "INSERT INTO events
+        (name, description, location, lat, lng, date, time, age_restriction, price, image_url, status, genre_id, owner_id)
+        VALUES
+        (:name, :description, :location, :lat, :lng, :date, :time, :age_restriction, :price, :image_url, :status, :genre_id, :owner_id)"
+    );
+
     $stmt->execute([
-        ':title' => $data['title'],
+        ':name' => $name,
         ':description' => $data['description'] ?? null,
         ':location' => $data['location'] ?? null,
         ':lat' => $data['lat'] ?? null,
@@ -80,98 +90,96 @@ if ($method === 'POST') {
         ':date' => $data['date'] ?? null,
         ':time' => $data['time'] ?? null,
         ':age_restriction' => $data['age_restriction'] ?? null,
-        ':price' => $data['price'] ?? null,
+        ':price' => $data['price'] ?? 0,
         ':image_url' => $data['image_url'] ?? null,
-        ':status' => $data['status'] ?? 'published',
-        ':created_by' => $currentUser['id']
+        ':status' => $status,
+        ':genre_id' => $genreId,
+        ':owner_id' => $currentUser['id'],
     ]);
-    
-    $eventId = $db->lastInsertId();
-    
-    // Add genres if specified
-    if (! empty($data['genres']) && is_array($data['genres'])) {
-        $genreStmt = $db->prepare("INSERT INTO event_genres (event_id, genre_id) VALUES (:event_id, :genre_id)");
+
+    $eventId = (int) $db->lastInsertId();
+
+    // Add additional genre links if provided
+    if (!empty($data['genres']) && is_array($data['genres'])) {
+        $genreStmt = $db->prepare("INSERT IGNORE INTO event_genres (event_id, genre_id) VALUES (:event_id, :genre_id)");
         foreach ($data['genres'] as $genreId) {
-            $genreStmt->execute([':event_id' => $eventId, ':genre_id' => $genreId]);
+            $genreStmt->execute([':event_id' => $eventId, ':genre_id' => (int) $genreId]);
         }
     }
-    
-    // Log action
-    $auth->logAction($currentUser['id'], 'create_event', 'event', $eventId, json_encode(['title' => $data['title']]), $_SERVER['REMOTE_ADDR']);
-    
+
+    $auth->logAction($currentUser['id'], 'create_event', 'event', $eventId, json_encode(['name' => $name]), $_SERVER['REMOTE_ADDR'] ?? null);
+
     echo json_encode(['success' => true, 'event_id' => $eventId, 'message' => 'Event created successfully']);
     exit;
 }
 
 // PUT - Update existing event
 if ($method === 'PUT') {
-    if (! isset($_GET['id'])) {
+    if (!isset($_GET['id'])) {
         http_response_code(400);
         echo json_encode(['error' => 'Event ID required']);
         exit;
     }
-    
+
     $eventId = intval($_GET['id']);
-    $data = json_decode(file_get_contents('php://input'), true);
-    
-    // Check if event exists
+    $data = json_decode(file_get_contents('php://input'), true) ?? [];
+
     $checkStmt = $db->prepare("SELECT * FROM events WHERE id = :id");
     $checkStmt->execute([':id' => $eventId]);
-    $existingEvent = $checkStmt->fetch();
-    
-    if (! $existingEvent) {
+    $existingEvent = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$existingEvent) {
         http_response_code(404);
         echo json_encode(['error' => 'Event not found']);
         exit;
     }
-    
-    // Update event
-    $stmt = $db->prepare("
-        UPDATE events SET
-        title = :title,
-        description = :description,
-        location = :location,
-        lat = :lat,
-        lng = :lng,
-        date = :date,
-        time = :time,
-        age_restriction = :age_restriction,
-        price = :price,
-        image_url = :image_url,
-        status = :status
-        WHERE id = :id
-    ");
-    
+
+    $name = event_name($data) ?: $existingEvent['name'];
+    $genreId = primary_genre_id($data);
+
+    $stmt = $db->prepare(
+        "UPDATE events SET
+            name = :name,
+            description = :description,
+            location = :location,
+            lat = :lat,
+            lng = :lng,
+            date = :date,
+            time = :time,
+            age_restriction = :age_restriction,
+            price = :price,
+            image_url = :image_url,
+            status = :status,
+            genre_id = :genre_id
+        WHERE id = :id"
+    );
+
     $stmt->execute([
-        ':title' => $data['title'] ?? $existingEvent['title'],
+        ':name' => $name,
         ':description' => $data['description'] ?? $existingEvent['description'],
         ':location' => $data['location'] ?? $existingEvent['location'],
         ':lat' => $data['lat'] ?? $existingEvent['lat'],
         ':lng' => $data['lng'] ?? $existingEvent['lng'],
         ':date' => $data['date'] ?? $existingEvent['date'],
-        ':time' => $data['time'] ??  $existingEvent['time'],
+        ':time' => $data['time'] ?? $existingEvent['time'],
         ':age_restriction' => $data['age_restriction'] ?? $existingEvent['age_restriction'],
         ':price' => $data['price'] ?? $existingEvent['price'],
         ':image_url' => $data['image_url'] ?? $existingEvent['image_url'],
-        ':status' => $data['status'] ??  $existingEvent['status'],
-        ':id' => $eventId
+        ':status' => $data['status'] ?? $existingEvent['status'],
+        ':genre_id' => $genreId ?? $existingEvent['genre_id'],
+        ':id' => $eventId,
     ]);
-    
-    // Update genres if specified
+
     if (isset($data['genres']) && is_array($data['genres'])) {
-        // Remove old genres
         $db->prepare("DELETE FROM event_genres WHERE event_id = :event_id")->execute([':event_id' => $eventId]);
-        
-        // Add new genres
-        $genreStmt = $db->prepare("INSERT INTO event_genres (event_id, genre_id) VALUES (:event_id, :genre_id)");
+        $genreStmt = $db->prepare("INSERT IGNORE INTO event_genres (event_id, genre_id) VALUES (:event_id, :genre_id)");
         foreach ($data['genres'] as $genreId) {
-            $genreStmt->execute([':event_id' => $eventId, ':genre_id' => $genreId]);
+            $genreStmt->execute([':event_id' => $eventId, ':genre_id' => (int) $genreId]);
         }
     }
-    
-    // Log action
-    $auth->logAction($currentUser['id'], 'update_event', 'event', $eventId, json_encode($data), $_SERVER['REMOTE_ADDR']);
-    
+
+    $auth->logAction($currentUser['id'], 'update_event', 'event', $eventId, json_encode($data), $_SERVER['REMOTE_ADDR'] ?? null);
+
     echo json_encode(['success' => true, 'message' => 'Event updated successfully']);
     exit;
 }
@@ -183,27 +191,23 @@ if ($method === 'DELETE') {
         echo json_encode(['error' => 'Event ID required']);
         exit;
     }
-    
+
     $eventId = intval($_GET['id']);
-    
-    // Check if event exists
-    $checkStmt = $db->prepare("SELECT title FROM events WHERE id = :id");
+
+    $checkStmt = $db->prepare("SELECT name FROM events WHERE id = :id");
     $checkStmt->execute([':id' => $eventId]);
-    $event = $checkStmt->fetch();
-    
+    $event = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
     if (!$event) {
         http_response_code(404);
         echo json_encode(['error' => 'Event not found']);
         exit;
     }
-    
-    // Delete event (cascades will handle event_genres and user_favorites)
-    $stmt = $db->prepare("DELETE FROM events WHERE id = :id");
-    $stmt->execute([':id' => $eventId]);
-    
-    // Log action
-    $auth->logAction($currentUser['id'], 'delete_event', 'event', $eventId, json_encode(['title' => $event['title']]), $_SERVER['REMOTE_ADDR']);
-    
+
+    $db->prepare("DELETE FROM events WHERE id = :id")->execute([':id' => $eventId]);
+
+    $auth->logAction($currentUser['id'], 'delete_event', 'event', $eventId, json_encode(['name' => $event['name']]), $_SERVER['REMOTE_ADDR'] ?? null);
+
     echo json_encode(['success' => true, 'message' => 'Event deleted successfully']);
     exit;
 }
