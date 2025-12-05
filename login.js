@@ -129,6 +129,8 @@ signupForm.addEventListener("submit", async (e) => {
   const nameEl = document.getElementById("fullname");
   const ageEl = document.getElementById("age");
   const emailEl = document.getElementById("signup-email");
+  const phoneEl = document.getElementById("signup-phone");
+  const locationEl = document.getElementById("signup-location");
   const passwordEl = document.getElementById("signup-password");
   const confirmEl = document.getElementById("confirm-password");
   const errorEl = document.getElementById("signup-error");
@@ -139,6 +141,8 @@ signupForm.addEventListener("submit", async (e) => {
   const name = nameEl.value.trim();
   const age = ageEl.value.trim();
   const email = emailEl.value.trim();
+  const phone = phoneEl.value.trim();
+  const location = locationEl.value.trim();
   const password = passwordEl.value;
   const confirm = confirmEl.value;
 
@@ -156,6 +160,12 @@ signupForm.addEventListener("submit", async (e) => {
   if (password !== confirm) clientErrors.push("Passwords do not match");
   if (!age || isNaN(age) || parseInt(age) < 13)
     clientErrors.push("Age must be 13 or older");
+  if (!phone)
+    clientErrors.push("Phone number is required with country code (e.g., +1 ...)");
+  else if (!/^\+[0-9()\s-]{7,}$/.test(phone))
+    clientErrors.push("Enter a valid phone number with country code (e.g., +1 555 123 4567)");
+  if (!location)
+    clientErrors.push("Location is required (e.g., City, Country)");
 
   if (clientErrors.length) {
     errorEl.textContent = clientErrors.join(". ");
@@ -193,6 +203,8 @@ signupForm.addEventListener("submit", async (e) => {
         email: user.email,
         name: normalizedName || null,
         age: parseInt(age),
+        phone,
+        location,
       }),
     });
 

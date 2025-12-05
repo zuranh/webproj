@@ -63,11 +63,33 @@
 
       <form id="signup-form" class="auth-form">
         <div class="form-group">
-          <label for="fullname">Full Name (optional)</label>
+          <label for="fullname">Full Name</label>
           <input
             type="text"
             id="fullname"
             placeholder="First and last name"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="signup-phone">Phone Number</label>
+          <input
+            type="tel"
+            id="signup-phone"
+            placeholder="+1 555 123 4567"
+            required
+            pattern="^\+[0-9()\s-]{7,}$"
+            title="Include country code (e.g., +1 555 123 4567)"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="signup-location">Location</label>
+          <input
+            type="text"
+            id="signup-location"
+            placeholder="City, Country"
+            required
           />
         </div>
 
