@@ -131,6 +131,74 @@ body {
     gap: 20px;
 }
 
+/* Genres and status */
+.genre-selection {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.genre-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.04);
+    transition: 0.2s ease;
+}
+
+.genre-option:hover {
+    border-color: #7aa2ff;
+    background: rgba(255,255,255,0.08);
+}
+
+.genre-option.selected {
+    border-color: #6fa8ff;
+    background: rgba(111,168,255,0.12);
+}
+
+.genre-option input[type="checkbox"] {
+    accent-color: #1f8bff;
+}
+
+.genre-icon {
+    font-size: 1.1rem;
+}
+
+.status-selection {
+    display: flex;
+    gap: 15px;
+    margin-top: 8px;
+}
+
+.status-option {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    background: rgba(255,255,255,0.04);
+    transition: 0.2s ease;
+}
+
+.status-option:hover {
+    border-color: #7aa2ff;
+}
+
+.status-option.selected {
+    border-color: #6fa8ff;
+    background: rgba(111,168,255,0.12);
+}
+
+.status-option input[type="radio"] {
+    margin-right: 8px;
+}
+
 /* =============================== */
 /*          SUBMIT BUTTON         */
 /* =============================== */
@@ -162,6 +230,26 @@ body {
     margin-top: 40px;
     color: #b3b3b3;
     font-size: 0.9rem;
+}
+
+.alert {
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    font-weight: 600;
+}
+
+.alert.success {
+    background: rgba(52, 199, 89, 0.15);
+    border-color: rgba(52, 199, 89, 0.4);
+    color: #d8ffe6;
+}
+
+.alert.error {
+    background: rgba(255, 82, 82, 0.15);
+    border-color: rgba(255, 82, 82, 0.4);
+    color: #ffd6d6;
 }
 
 /* =============================== */
