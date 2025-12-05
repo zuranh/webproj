@@ -60,7 +60,7 @@ if ($hasPhone) {
         $errors[] = 'Phone is required';
     } elseif (mb_strlen($phone) > 30) {
         $errors[] = 'Phone is too long (max 30 characters)';
-    } elseif ($numericLength < 7 || $numericLength > 15 || !preg_match('/^\+[0-9\s()\-]+$/', $phone)) {
+    } elseif ($numericLength < 7 || $numericLength > 15 || !preg_match('/^\+[0-9\s().\-]+$/', $phone)) {
         $errors[] = 'Phone must include country code (7-15 digits, e.g., +1 555 123 4567)';
     }
 } else {

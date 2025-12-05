@@ -18,7 +18,7 @@ function isStrongPassword(value) {
   return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(value);
 }
 
-const phonePattern = /^\+[0-9\s()\-]{7,}$/;
+const phonePattern = /^\+[0-9\s().-]{7,}$/;
 const locationPattern = /^(?=.{2,191}$)(?=.*[A-Za-z])[A-Za-z\s',.-]+$/;
 
 function showLogin() {
@@ -144,7 +144,9 @@ signupForm.addEventListener("submit", async (e) => {
   const name = nameEl.value.trim();
   const age = ageEl.value.trim();
   const email = emailEl.value.trim();
-  const phone = phoneEl.value.trim();
+  const rawPhone = phoneEl.value;
+  const phone = rawPhone.replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
+  phoneEl.value = phone;
   const location = locationEl.value.trim();
   const password = passwordEl.value;
   const confirm = confirmEl.value;
@@ -168,7 +170,7 @@ signupForm.addEventListener("submit", async (e) => {
   const phoneDigits = phone.replace(/\D/g, "");
   if (!phone)
     clientErrors.push("Phone number is required with country code (e.g., +1 ...)");
-  else if (!phone.startsWith("+")) {
+  else if (!/^\+/.test(phone)) {
     clientErrors.push("Phone number must start with + and country code");
     phoneEl.setCustomValidity("Phone number must start with + and country code");
   } else if (phoneDigits.length < 7 || phoneDigits.length > 15 || !phonePattern.test(phone)) {
