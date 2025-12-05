@@ -188,12 +188,14 @@ body {
 }
 
 .details-btn {
+    display: inline-block;
     padding: 8px 14px;
     border: none;
     background: #0077ff;
     color: white;
     border-radius: 8px;
     cursor: pointer;
+    text-decoration: none;
 }
 
 .details-btn:hover {
