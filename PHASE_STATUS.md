@@ -11,12 +11,10 @@ Evidence:
 - Account page loads profile fields (name, email, age, location, phone, bio, joined date) and links to edit/change password/delete flows.【F:scripts/account.js†L13-L140】【F:account.html†L45-L113】
 
 ## Phase 4: Event Registration System
-Status: **Complete**
+Status: **Not started**
 
-Evidence:
-- Registrations API handles create/cancel/list, enforces capacity, prevents duplicates, and backfills missing schema columns.【F:api/registrations.php†L1-L205】【F:api/registrations.php†L207-L320】
-- Event detail page blocks unauthenticated users, shows remaining spots, and registers via the API with a confirmation redirect.【F:event.html†L311-L373】【F:event.html†L480-L547】
-- My Registrations page lists current registrations with cancel controls using the authenticated API.【F:registrations.html†L1-L41】【F:scripts/registrations.js†L1-L108】
+Notes:
+- Registration endpoints, UI, and database tables are intentionally removed. The event page currently shows the legacy “Registration coming soon” alert only.
 
 ## Recommended Next Steps
 Proceed to **Phase 5 (Admin & Owner Features)**:

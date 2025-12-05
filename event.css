@@ -203,14 +203,6 @@ main#main-content {
     box-shadow: 0 8px 16px rgba(0,123,255,0.4);
 }
 
-#register-btn.registered {
-    background: #16a34a;
-    color: #fff;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-}
-
 #favorite-btn {
     background: #ffd700;
     color: #111;
