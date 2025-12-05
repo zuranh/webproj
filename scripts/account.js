@@ -16,6 +16,15 @@ async function syncUserRecord(user) {
 
   const nameToSend = (user.displayName || "").trim() || null;
 
+  const cachedPhone = (localStorage.getItem("signupPhone") || "").trim();
+  const cachedLocation = (localStorage.getItem("signupLocation") || "").trim();
+
+  if (!cachedPhone || !cachedLocation) {
+    throw new Error(
+      "Phone and location are required to restore your account. Please sign out and sign up again with valid details."
+    );
+  }
+
   const res = await fetch("api/sync-user.php", {
     method: "POST",
     headers: {
@@ -26,6 +35,8 @@ async function syncUserRecord(user) {
       uid: user.uid,
       email: user.email,
       name: nameToSend,
+      phone: cachedPhone,
+      location: cachedLocation,
     }),
   });
 
@@ -85,6 +96,13 @@ async function loadProfile() {
       document.getElementById("user-joined").textContent = userData.joined_at
         ? new Date(userData.joined_at).toLocaleDateString()
         : "N/A";
+
+      if (userData.phone) {
+        localStorage.setItem("signupPhone", userData.phone);
+      }
+      if (userData.location) {
+        localStorage.setItem("signupLocation", userData.location);
+      }
     } catch (err) {
       console.error("Profile load error:", err);
       alert("Unable to load profile: " + err.message);
