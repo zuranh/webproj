@@ -175,6 +175,10 @@ body {
     width: 100%;
   }
 
+  .admin-header {
+    margin-left: 0;
+  }
+
   .form-row {
     flex-direction: column;
   }
@@ -276,9 +280,12 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: white;
-  border-bottom: 2px solid #f0f0f0;
+  background: rgba(20, 22, 35, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f5f5f5;
+  backdrop-filter: blur(18px);
   margin-bottom: 2rem;
+  margin-left: 260px;
 }
 
 .admin-user-info {
@@ -289,5 +296,5 @@ body {
 
 .admin-user-name {
   font-weight: 600;
-  color: #333;
+  color: #f5f5f5;
 }
