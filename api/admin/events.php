@@ -20,6 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $db = require __DIR__ . '/../db.php';
 require_once __DIR__ . '/../auth.php';
 
+// Ensure tables/columns exist before we start querying/inserting
+ensureEventsSchema($db);
+
 $auth = new Auth($db);
 $currentUser = $auth->requireAdmin();
 
@@ -72,6 +75,67 @@ function sanitizeInt($value)
         return null;
     }
     return (int) $value;
+}
+
+function columnExists(PDO $db, string $table, string $column): bool
+{
+    $stmt = $db->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table AND COLUMN_NAME = :column");
+    $stmt->execute([':table' => $table, ':column' => $column]);
+    return (bool) $stmt->fetchColumn();
+}
+
+function ensureEventsSchema(PDO $db): void
+{
+    // Create events table if missing
+    $db->exec(
+        "CREATE TABLE IF NOT EXISTS `events` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `name` VARCHAR(255) NOT NULL,
+            `description` TEXT,
+            `location` VARCHAR(255),
+            `lat` DOUBLE,
+            `lng` DOUBLE,
+            `date` DATE,
+            `time` TIME,
+            `age_restriction` INT,
+            `price` DECIMAL(10,2) DEFAULT 0.00,
+            `image_url` VARCHAR(500),
+            `status` ENUM('draft','published','archived') DEFAULT 'published',
+            `genre_id` INT,
+            `owner_id` INT NOT NULL,
+            `capacity` INT DEFAULT 0,
+            `available_spots` INT DEFAULT 0,
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX `idx_date` (`date`),
+            INDEX `idx_status` (`status`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+    );
+
+    // Backfill critical columns for older schemas
+    $columns = [
+        'owner_id' => 'ADD COLUMN `owner_id` INT NOT NULL DEFAULT 1',
+        'capacity' => 'ADD COLUMN `capacity` INT DEFAULT 0',
+        'available_spots' => 'ADD COLUMN `available_spots` INT DEFAULT 0',
+        'status' => "ADD COLUMN `status` ENUM('draft','published','archived') DEFAULT 'published'",
+        'genre_id' => 'ADD COLUMN `genre_id` INT NULL',
+        'image_url' => 'ADD COLUMN `image_url` VARCHAR(500) NULL',
+        'price' => 'ADD COLUMN `price` DECIMAL(10,2) DEFAULT 0.00',
+        'age_restriction' => 'ADD COLUMN `age_restriction` INT NULL',
+        'lat' => 'ADD COLUMN `lat` DOUBLE NULL',
+        'lng' => 'ADD COLUMN `lng` DOUBLE NULL',
+    ];
+
+    $alter = [];
+    foreach ($columns as $column => $sql) {
+        if (!columnExists($db, 'events', $column)) {
+            $alter[] = $sql;
+        }
+    }
+
+    if (!empty($alter)) {
+        $db->exec('ALTER TABLE events ' . implode(', ', $alter));
+    }
 }
 
 if ($method === 'GET') {

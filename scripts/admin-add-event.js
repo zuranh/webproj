@@ -127,10 +127,17 @@ async function handleSubmit(event) {
       method: "POST",
       body: JSON.stringify(payload),
     });
-    const data = await response.json();
+    const raw = await response.text();
+    let data = {};
+    try {
+      data = raw ? JSON.parse(raw) : {};
+    } catch (parseErr) {
+      // fall back to raw text below
+    }
 
-    if (!data.success) {
-      throw new Error(data.error || "Failed to create event");
+    if (!response.ok || !data.success) {
+      const message = data?.error || raw || `Request failed (${response.status})`;
+      throw new Error(message);
     }
 
     showAlert("Event created successfully!", "success");
@@ -153,6 +160,7 @@ async function init() {
     await loadGenres();
   } catch (err) {
     console.error("Admin auth failed", err);
+    showAlert(err.message || "Admin access required", "error");
   }
 }
 
