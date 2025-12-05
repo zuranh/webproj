@@ -55,12 +55,13 @@ if ($hasAge) {
 }
 
 if ($hasPhone) {
+    $numericLength = strlen(preg_replace('/\D+/', '', $phone));
     if ($phone === '') {
         $errors[] = 'Phone is required';
     } elseif (mb_strlen($phone) > 30) {
         $errors[] = 'Phone is too long (max 30 characters)';
-    } elseif (!preg_match('/^\+[0-9][0-9()\s-]{6,}$/', $phone)) {
-        $errors[] = 'Phone must include country code (digits only, e.g., +1 555 123 4567)';
+    } elseif ($numericLength < 7 || $numericLength > 15 || !preg_match('/^\+[0-9\s()\-]+$/', $phone)) {
+        $errors[] = 'Phone must include country code (7-15 digits, e.g., +1 555 123 4567)';
     }
 } else {
     $errors[] = 'Phone is required';

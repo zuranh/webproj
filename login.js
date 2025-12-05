@@ -18,7 +18,7 @@ function isStrongPassword(value) {
   return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(value);
 }
 
-const phonePattern = /^\+[0-9]{1,4}(?:[\s-]?[0-9]{2,}){2,}$/;
+const phonePattern = /^\+[0-9\s()\-]{7,}$/;
 const locationPattern = /^(?=.{2,191}$)(?=.*[A-Za-z])[A-Za-z\s',.-]+$/;
 
 function showLogin() {
@@ -165,14 +165,18 @@ signupForm.addEventListener("submit", async (e) => {
   if (password !== confirm) clientErrors.push("Passwords do not match");
   if (!age || isNaN(age) || parseInt(age) < 13)
     clientErrors.push("Age must be 13 or older");
+  const phoneDigits = phone.replace(/\D/g, "");
   if (!phone)
     clientErrors.push("Phone number is required with country code (e.g., +1 ...)");
-  else if (!phonePattern.test(phone)) {
+  else if (!phone.startsWith("+")) {
+    clientErrors.push("Phone number must start with + and country code");
+    phoneEl.setCustomValidity("Phone number must start with + and country code");
+  } else if (phoneDigits.length < 7 || phoneDigits.length > 15 || !phonePattern.test(phone)) {
     clientErrors.push(
-      "Enter a valid phone number with country code (digits only, e.g., +1 555 123 4567)"
+      "Enter a valid phone number with country code (7-15 digits, e.g., +1 555 123 4567)"
     );
     phoneEl.setCustomValidity(
-      "Enter a valid phone number with country code (digits only, e.g., +1 555 123 4567)"
+      "Enter a valid phone number with country code (7-15 digits, e.g., +1 555 123 4567)"
     );
   }
   if (!location)
