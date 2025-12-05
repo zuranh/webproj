@@ -162,10 +162,14 @@ signupForm.addEventListener("submit", async (e) => {
     clientErrors.push("Age must be 13 or older");
   if (!phone)
     clientErrors.push("Phone number is required with country code (e.g., +1 ...)");
-  else if (!/^\+[0-9()\s-]{7,}$/.test(phone))
-    clientErrors.push("Enter a valid phone number with country code (e.g., +1 555 123 4567)");
+  else if (!/^\+[0-9][0-9()\s-]{6,}$/.test(phone))
+    clientErrors.push(
+      "Enter a valid phone number with country code (digits only, e.g., +1 555 123 4567)"
+    );
   if (!location)
     clientErrors.push("Location is required (e.g., City, Country)");
+  else if (!/^(?=.*[A-Za-z]).{2,191}$/.test(location))
+    clientErrors.push("Location must include letters (e.g., City, Country)");
 
   if (clientErrors.length) {
     errorEl.textContent = clientErrors.join(". ");

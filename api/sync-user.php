@@ -56,20 +56,26 @@ if ($hasAge) {
 
 if ($hasPhone) {
     if ($phone === '') {
-        $phone = null;
+        $errors[] = 'Phone is required';
     } elseif (mb_strlen($phone) > 30) {
         $errors[] = 'Phone is too long (max 30 characters)';
-    } elseif (!preg_match('/^\+[0-9()\s-]{7,}$/', $phone)) {
-        $errors[] = 'Phone must include country code (e.g., +1 555 123 4567)';
+    } elseif (!preg_match('/^\+[0-9][0-9()\s-]{6,}$/', $phone)) {
+        $errors[] = 'Phone must include country code (digits only, e.g., +1 555 123 4567)';
     }
+} else {
+    $errors[] = 'Phone is required';
 }
 
 if ($hasLocation) {
     if ($location === '') {
-        $location = null;
+        $errors[] = 'Location is required';
     } elseif (mb_strlen($location) > 191) {
         $errors[] = 'Location is too long (max 191 characters)';
+    } elseif (!preg_match('/^(?=.*[A-Za-z]).{2,191}$/', $location)) {
+        $errors[] = 'Location must include letters (e.g., City, Country)';
     }
+} else {
+    $errors[] = 'Location is required';
 }
 
 if (!empty($errors)) {
