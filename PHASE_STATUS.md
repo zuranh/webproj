@@ -10,11 +10,16 @@ Evidence:
 - Favorites page fetches authenticated favorites, renders cards, and handles removals.【F:favorites.html†L296-L463】
 - Account page loads profile fields (name, email, age, location, phone, bio, joined date) and links to edit/change password/delete flows.【F:scripts/account.js†L13-L140】【F:account.html†L45-L113】
 
-## Recommended Next Steps
-Proceed to **Phase 4 (Event Registration System)**:
-- Add registration table and API to create/cancel registrations and enforce capacity.
-- Add "Register Now" flow on event detail page with confirmation screen and email hook if desired.
-- Build "My Registrations" page to show upcoming/past registrations with cancel options.
-- Surface "Already Registered" and spots remaining on event cards.
+## Phase 4: Event Registration System
+Status: **Complete**
 
-Afterward, move into **Phase 5 (Admin & Owner Features)** to deliver dashboard stats, action logs, user management, and richer event CRUD (status, images, genres).
+Evidence:
+- Registrations API handles create/cancel/list, enforces capacity, prevents duplicates, and backfills missing schema columns.【F:api/registrations.php†L1-L205】【F:api/registrations.php†L207-L320】
+- Event detail page blocks unauthenticated users, shows remaining spots, and registers via the API with a confirmation redirect.【F:event.html†L311-L373】【F:event.html†L480-L547】
+- My Registrations page lists current registrations with cancel controls using the authenticated API.【F:registrations.html†L1-L41】【F:scripts/registrations.js†L1-L108】
+
+## Recommended Next Steps
+Proceed to **Phase 5 (Admin & Owner Features)**:
+- Build dashboard metrics (events/users/registrations), recent activity, and quick actions.
+- Enhance event management with status changes, image uploads, and genre management.
+- Add owner-only user management (roles, activation) plus admin action logging for auditing.
