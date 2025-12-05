@@ -22,6 +22,33 @@ require_once __DIR__ . '/../auth.php';
 
 $auth = new Auth($db);
 $currentUser = $auth->requireAdmin();
+
+// Ensure supporting tables exist for legacy databases
+$db->exec(
+    "CREATE TABLE IF NOT EXISTS `event_genres` (
+        `event_id` INT NOT NULL,
+        `genre_id` INT NOT NULL,
+        PRIMARY KEY (`event_id`, `genre_id`),
+        CONSTRAINT `fk_eg_event` FOREIGN KEY (`event_id`) REFERENCES `events`(`id`) ON DELETE CASCADE,
+        CONSTRAINT `fk_eg_genre` FOREIGN KEY (`genre_id`) REFERENCES `genres`(`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+);
+
+$db->exec(
+    "CREATE TABLE IF NOT EXISTS `registrations` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY,
+        `user_id` INT NOT NULL,
+        `event_id` INT NOT NULL,
+        `status` ENUM('registered','canceled') DEFAULT 'registered',
+        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+        `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY `unique_user_event` (`user_id`, `event_id`),
+        INDEX `idx_event` (`event_id`),
+        INDEX `idx_user` (`user_id`),
+        CONSTRAINT `fk_reg_user_events` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+        CONSTRAINT `fk_reg_event_events` FOREIGN KEY (`event_id`) REFERENCES `events`(`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+);
 $method = $_SERVER['REQUEST_METHOD'];
 
 function respond($status, $payload)
@@ -148,7 +175,10 @@ if ($method === 'PUT') {
     }
 
     $capacity = array_key_exists('capacity', $input) ? sanitizeInt($input['capacity']) : $existing['capacity'];
-    $available = $capacity;
+    $regStmt = $db->prepare("SELECT COUNT(*) FROM registrations WHERE event_id = :event_id AND status = 'registered'");
+    $regStmt->execute([':event_id' => $eventId]);
+    $registeredCount = (int) $regStmt->fetchColumn();
+    $available = $capacity !== null ? max($capacity - $registeredCount, 0) : 0;
 
     $stmt = $db->prepare(
         "UPDATE events SET

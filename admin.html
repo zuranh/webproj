@@ -57,6 +57,16 @@
           <div class="stat-value" id="stat-recent">--</div>
           <div class="stat-sub">Last 24h events created/updated</div>
         </div>
+        <div class="stat-card">
+          <div class="stat-label">Capacity</div>
+          <div class="stat-value" id="stat-capacity">--</div>
+          <div class="stat-sub" id="stat-available">-- available</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Utilization</div>
+          <div class="stat-value" id="stat-utilization">--%</div>
+          <div class="stat-sub">Registered vs. capacity</div>
+        </div>
       </section>
 
       <section class="panel">
@@ -94,6 +104,47 @@
                 <th>Status</th>
                 <th>Date</th>
                 <th>Creator</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="4" class="loading-row">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" id="genre-panel">
+        <div class="panel-header">
+          <h3>Genre Breakdown</h3>
+        </div>
+        <div class="table-wrapper">
+          <table class="glass-table" id="genre-breakdown">
+            <thead>
+              <tr>
+                <th>Genre</th>
+                <th>Events</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="2" class="loading-row">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" id="actions-panel">
+        <div class="panel-header">
+          <h3>Admin Activity</h3>
+          <a class="panel-link" href="admin-actions.html">View log</a>
+        </div>
+        <div class="table-wrapper">
+          <table class="glass-table" id="recent-actions">
+            <thead>
+              <tr>
+                <th>Admin</th>
+                <th>Action</th>
+                <th>Target</th>
+                <th>When</th>
               </tr>
             </thead>
             <tbody>

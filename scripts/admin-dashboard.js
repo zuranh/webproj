@@ -23,10 +23,14 @@ async function loadStats() {
     renderCounts(data.counts);
     renderRecentRegistrations(data.recentRegistrations || []);
     renderRecentEvents(data.recentEvents || []);
+    renderGenres(data.genreBreakdown || []);
+    renderActions(data.recentActions || [], data.role);
   } catch (error) {
     console.error('Failed to load dashboard stats:', error);
     showErrorRow('recent-registrations', 'Unable to load registrations');
     showErrorRow('recent-events', 'Unable to load events');
+    showErrorRow('genre-breakdown', 'Unable to load genres');
+    showErrorRow('recent-actions', 'Unable to load activity');
   }
 }
 
@@ -37,6 +41,14 @@ function renderCounts(counts) {
   document.getElementById('stat-users').textContent = fmt(counts.users);
   document.getElementById('stat-registrations').textContent = fmt(counts.registrations);
   document.getElementById('stat-cancellations').textContent = `${fmt(counts.cancellations)} canceled`;
+
+   const capacity = counts.capacity ?? 0;
+   const available = counts.available ?? 0;
+   const utilization = capacity > 0 ? Math.min(100, Math.round(((counts.registrations || 0) / capacity) * 100)) : 0;
+
+   document.getElementById('stat-capacity').textContent = fmt(capacity);
+   document.getElementById('stat-available').textContent = `${fmt(available)} available`;
+   document.getElementById('stat-utilization').textContent = `${utilization}%`;
 
   const recentCount = (counts.events || 0) + (counts.registrations || 0);
   document.getElementById('stat-recent').textContent = fmt(recentCount);
@@ -58,6 +70,58 @@ function renderRecentRegistrations(rows) {
       <td>${escapeHtml(row.user_name || 'Unknown')}</td>
       <td><span class="status-pill status-${row.status}">${row.status || 'registered'}</span></td>
       <td>${formatDate(row.created_at)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderGenres(genres) {
+  const tbody = document.querySelector('#genre-breakdown tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+
+  if (!genres.length) {
+    tbody.innerHTML = '<tr><td colspan="2" class="empty-row">No genre data yet</td></tr>';
+    return;
+  }
+
+  genres.forEach((genre) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(genre.name || 'Untitled')}</td>
+      <td>${genre.event_count ?? 0}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderActions(actions, role) {
+  const panel = document.getElementById('actions-panel');
+  const tbody = document.querySelector('#recent-actions tbody');
+
+  if (!panel || !tbody) return;
+
+  if (role !== 'owner') {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = '';
+  tbody.innerHTML = '';
+
+  if (!actions.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty-row">No admin actions yet</td></tr>';
+    return;
+  }
+
+  actions.forEach((action) => {
+    const tr = document.createElement('tr');
+    const target = action.target_type ? `${action.target_type} #${action.target_id ?? ''}` : '—';
+    tr.innerHTML = `
+      <td>${escapeHtml(action.admin_name || 'Unknown')}</td>
+      <td>${escapeHtml(action.action || '')}</td>
+      <td>${escapeHtml(target)}</td>
+      <td>${formatDate(action.created_at)}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -94,7 +158,8 @@ function setLoadingRows(tableId) {
 function showErrorRow(tableId, message) {
   const tbody = document.querySelector(`#${tableId} tbody`);
   if (tbody) {
-    tbody.innerHTML = `<tr><td colspan="4" class="error-row">${escapeHtml(message)}</td></tr>`;
+    const cols = tbody.parentElement?.querySelectorAll('thead th').length || 1;
+    tbody.innerHTML = `<tr><td colspan="${cols}" class="error-row">${escapeHtml(message)}</td></tr>`;
   }
 }
 

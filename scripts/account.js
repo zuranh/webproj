@@ -40,6 +40,11 @@ async function loadProfile() {
       document.getElementById("user-joined").textContent = userData.joined_at
         ? new Date(userData.joined_at).toLocaleDateString()
         : "N/A";
+
+      const adminLink = document.getElementById("admin-link");
+      if (adminLink && (userData.role === "admin" || userData.role === "owner")) {
+        adminLink.style.display = "list-item";
+      }
     } catch (err) {
       console.error("Profile load error:", err);
       alert("Unable to load profile: " + err.message);

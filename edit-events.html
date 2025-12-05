@@ -5,656 +5,124 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin – Edit Events</title>
     <link rel="stylesheet" href="admin-page.css" />
-    <style>
-      /* Event list styles */
-      .events-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-      }
-
-      .event-card {
-        border: 2px solid #e0e0e0;
-        border-radius: 12px;
-        padding: 20px;
-        cursor: pointer;
-        transition: all 0.3s;
-        background: white;
-      }
-
-      .event-card:hover {
-        border-color: #667eea;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-        transform: translateY(-2px);
-      }
-
-      .event-card.selected {
-        border-color: #667eea;
-        background: #f0f3ff;
-      }
-
-      .event-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: start;
-        margin-bottom: 10px;
-      }
-
-      .event-card-title {
-        font-weight: 600;
-        font-size: 1.1rem;
-        color: #333;
-        margin: 0 0 5px 0;
-      }
-
-      .event-card-status {
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 0.75rem;
-        font-weight: bold;
-      }
-
-      .status-published {
-        background: #d4edda;
-        color: #155724;
-      }
-
-      .status-draft {
-        background: #fff3cd;
-        color: #856404;
-      }
-
-      .status-archived {
-        background: #f8d7da;
-        color: #721c24;
-      }
-
-      .event-card-info {
-        color: #666;
-        font-size: 0.9rem;
-        margin: 5px 0;
-      }
-
-      .event-genres {
-        display: flex;
-        gap: 5px;
-        flex-wrap: wrap;
-        margin-top: 10px;
-      }
-
-      .genre-tag {
-        background: #e0e0e0;
-        padding: 4px 8px;
-        border-radius: 8px;
-        font-size: 0.75rem;
-      }
-
-      .edit-form {
-        background: white;
-        border: 2px solid #667eea;
-        border-radius: 12px;
-        padding: 30px;
-        margin-top: 30px;
-        display: none;
-      }
-
-      .edit-form.active {
-        display: block;
-      }
-
-      .form-actions {
-        display: flex;
-        gap: 15px;
-        margin-top: 30px;
-      }
-
-      .submit-btn {
-        flex: 1;
-        padding: 15px;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-      }
-
-      .btn-update {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-      }
-
-      .btn-delete {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-      }
-
-      .btn-cancel {
-        background: #e0e0e0;
-        color: #666;
-      }
-
-      .submit-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      }
-
-      .submit-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-      }
-
-      .genre-selection {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 10px;
-        margin-top: 10px;
-      }
-
-      .genre-option {
-        display: flex;
-        align-items: center;
-        padding: 10px;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s;
-      }
-
-      .genre-option:hover {
-        border-color: #667eea;
-        background: #f8f9ff;
-      }
-
-      .genre-option.selected {
-        border-color: #667eea;
-        background: #f0f3ff;
-      }
-
-      .genre-icon {
-        margin-right: 5px;
-        font-size: 1 2em;
-      }
-
-      .alert {
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 8px;
-        display: none;
-      }
-
-      .alert.success {
-        background: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-      }
-
-      .alert.error {
-        background: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-      }
-
-      .no-events {
-        text-align: center;
-        padding: 60px 20px;
-        color: #999;
-      }
-
-      .loading {
-        text-align: center;
-        padding: 40px;
-        color: #999;
-      }
-    </style>
+    <link rel="stylesheet" href="admin-events.css" />
   </head>
 
   <body>
-    <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="logo">Eventify Admin</div>
-
       <nav>
         <a class="nav-link" href="admin.html">Admin profile</a>
-        <a class="nav-link" href="admin-users.html" data-require-owner
-          >Admin Users</a
-        >
+        <a class="nav-link" href="admin-users.html" data-require-owner>Admin Users</a>
         <a class="nav-link" href="addEvents.html">Add Events</a>
         <a class="nav-link active" href="edit-events.html">Edit Events</a>
         <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="admin-actions.html">Admin Actions</a>
       </nav>
     </aside>
 
-    <!-- MAIN CONTENT -->
-    <div class="content">
-      <!-- PAGE HEADER -->
+    <main class="content">
       <header class="page-header">
-        <h1>Manage Events</h1>
-        <p>Select an event to edit or delete.</p>
+        <h1>Edit Events</h1>
+        <p>Select an event to update its details, status, or genres.</p>
       </header>
 
-      <div id="alert-container"></div>
+      <section class="panel">
+        <div class="panel-header">
+          <h3>Choose an event to edit</h3>
+        </div>
+        <div id="event-list" class="events-grid">
+          <p class="no-events">Loading events...</p>
+        </div>
+      </section>
 
-      <!-- EVENTS LIST -->
-      <div id="events-container" class="loading">
-        <p>Loading events...</p>
-      </div>
+      <section class="edit-form" id="edit-form">
+        <div class="alert" id="form-alert"></div>
 
-      <!-- EDIT FORM -->
-      <div id="edit-form" class="edit-form">
-        <h2>Edit Event</h2>
-
-        <form id="event-form">
+        <div class="form-row">
           <div class="input-group">
             <label for="event-title">Event Title *</label>
             <input type="text" id="event-title" required />
           </div>
 
           <div class="input-group">
-            <label for="event-description">Description *</label>
-            <textarea id="event-description" rows="5" required></textarea>
+            <label for="event-status">Status *</label>
+            <select id="event-status" required>
+              <option value="published">Published</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="event-description">Description *</label>
+          <textarea id="event-description" rows="5" required></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="input-group">
+            <label for="event-date">Date *</label>
+            <input type="date" id="event-date" required />
           </div>
 
           <div class="input-group">
-            <label>Genres *</label>
-            <div id="genre-selection" class="genre-selection">
-              <!-- Genres loaded dynamically -->
-            </div>
+            <label for="event-time">Time *</label>
+            <input type="time" id="event-time" required />
           </div>
+        </div>
 
-          <div class="form-row">
-            <div class="input-group">
-              <label for="event-date">Date *</label>
-              <input type="date" id="event-date" required />
-            </div>
+        <div class="input-group">
+          <label for="event-location">Location *</label>
+          <input type="text" id="event-location" required />
+        </div>
 
-            <div class="input-group">
-              <label for="event-time">Time *</label>
-              <input type="time" id="event-time" required />
-            </div>
+        <div class="form-row">
+          <div class="input-group">
+            <label for="event-age">Age Restriction</label>
+            <input type="number" id="event-age" placeholder="0 = all ages" />
           </div>
 
           <div class="input-group">
-            <label for="event-location">Location *</label>
-            <input type="text" id="event-location" required />
+            <label for="event-price">Ticket Price ($)</label>
+            <input type="number" id="event-price" min="0" step="0.01" placeholder="0.00" />
           </div>
+        </div>
 
-          <div class="form-row">
-            <div class="input-group">
-              <label for="event-lat">Latitude</label>
-              <input
-                type="number"
-                id="event-lat"
-                step="0.000001"
-                min="-90"
-                max="90"
-              />
-            </div>
-
-            <div class="input-group">
-              <label for="event-lng">Longitude</label>
-              <input
-                type="number"
-                id="event-lng"
-                step="0.000001"
-                min="-180"
-                max="180"
-              />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="input-group">
-              <label for="event-price">Ticket Price ($)</label>
-              <input type="number" id="event-price" step="0.01" min="0" />
-            </div>
-
-            <div class="input-group">
-              <label for="event-age">Age Restriction</label>
-              <input type="number" id="event-age" min="0" />
-            </div>
+        <div class="form-row">
+          <div class="input-group">
+            <label for="event-capacity">Capacity</label>
+            <input type="number" id="event-capacity" min="0" placeholder="0 = unlimited" />
           </div>
 
           <div class="input-group">
             <label for="event-image">Image URL</label>
-            <input type="url" id="event-image" />
+            <input type="url" id="event-image" placeholder="https://example.com/event.jpg" />
           </div>
+        </div>
 
-          <div class="input-group">
-            <label for="event-status">Status</label>
-            <select id="event-status">
-              <option value="published">📢 Published</option>
-              <option value="draft">📝 Draft</option>
-              <option value="archived">🗄️ Archived</option>
-            </select>
+        <div class="input-group">
+          <label>Genres</label>
+          <div class="genre-selection" id="genre-selection">
+            <p>Loading genres...</p>
           </div>
+        </div>
 
-          <div class="form-actions">
-            <button type="button" class="submit-btn btn-cancel" id="cancel-btn">
-              Cancel
-            </button>
-            <button type="submit" class="submit-btn btn-update" id="update-btn">
-              <span id="update-text">Update Event</span>
-              <span id="update-loader" style="display: none"
-                >⏳ Updating...</span
-              >
-            </button>
-            <button type="button" class="submit-btn btn-delete" id="delete-btn">
-              <span id="delete-text">Delete Event</span>
-              <span id="delete-loader" style="display: none"
-                >⏳ Deleting...</span
-              >
-            </button>
-          </div>
-        </form>
-      </div>
+        <div class="form-actions">
+          <button class="btn-primary" id="save-event">Update Event</button>
+          <button class="btn-danger" id="delete-event" type="button">Delete Event</button>
+          <button class="btn-secondary" id="cancel-edit" type="button">Cancel</button>
+        </div>
+      </section>
 
       <footer class="footer">
-        <p>© 2025 Eventify Admin</p>
+        <p>© 2025 Eventify Admin — Development Mode</p>
       </footer>
-    </div>
+    </main>
 
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.x/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.x/firebase-auth-compat.js"></script>
     <script src="/firebase-config.js"></script>
     <script src="/scripts/admin-auth.js"></script>
-
-    <script>
-      let allEvents = [];
-      let availableGenres = [];
-      let selectedEvent = null;
-
-      // Initialize
-      adminAuth
-        .init()
-        .then((user) => {
-          console.log("Admin authenticated:", user);
-          adminAuth.updateUIForRole();
-          loadGenres();
-          loadEvents();
-        })
-        .catch((error) => {
-          console.error("Auth failed:", error);
-        });
-
-      // Load genres
-      async function loadGenres() {
-        try {
-          const response = await fetch("/api/genres.php");
-          const data = await response.json();
-          if (data.success) {
-            availableGenres = data.genres;
-          }
-        } catch (error) {
-          console.error("Failed to load genres:", error);
-        }
-      }
-
-      // Load all events
-      async function loadEvents() {
-        try {
-          const response = await adminAuth.apiRequest("/api/admin/events.php");
-          const data = await response.json();
-
-          if (data.success) {
-            allEvents = data.events;
-            renderEvents();
-          }
-        } catch (error) {
-          console.error("Failed to load events:", error);
-          showAlert("Failed to load events", "error");
-        }
-      }
-
-      // Render events grid
-      function renderEvents() {
-        const container = document.getElementById("events-container");
-
-        if (allEvents.length === 0) {
-          container.innerHTML =
-            '<div class="no-events"><h3>No events found</h3><p>Create your first event! </p></div>';
-          return;
-        }
-
-        container.innerHTML = '<div class="events-grid"></div>';
-        const grid = container.querySelector(".events-grid");
-
-        allEvents.forEach((event) => {
-          const card = document.createElement("div");
-          card.className = "event-card";
-          card.innerHTML = `
-                    <div class="event-card-header">
-                        <h3 class="event-card-title">${event.title}</h3>
-                        <span class="event-card-status status-${
-                          event.status
-                        }">${event.status}</span>
-                    </div>
-                    <p class="event-card-info">📅 ${event.date} ${
-            event.time || ""
-          }</p>
-                    <p class="event-card-info">📍 ${
-                      event.location || "No location"
-                    }</p>
-                    <p class="event-card-info">💰 $${event.price || "0. 00"}</p>
-                    <div class="event-genres">
-                        ${(event.genres || [])
-                          .map((g) => `<span class="genre-tag">${g}</span>`)
-                          .join("")}
-                    </div>
-                `;
-
-          card.addEventListener("click", () => selectEvent(event));
-          grid.appendChild(card);
-        });
-      }
-
-      // Select event for editing
-      function selectEvent(event) {
-        selectedEvent = event;
-
-        // Update UI
-        document
-          .querySelectorAll(".event-card")
-          .forEach((card) => card.classList.remove("selected"));
-        event.target?.classList?.add("selected");
-
-        // Show form
-        document.getElementById("edit-form").classList.add("active");
-
-        // Populate form
-        document.getElementById("event-title").value = event.title;
-        document.getElementById("event-description").value =
-          event.description || "";
-        document.getElementById("event-date").value = event.date || "";
-        document.getElementById("event-time").value = event.time || "";
-        document.getElementById("event-location").value = event.location || "";
-        document.getElementById("event-lat").value = event.lat || "";
-        document.getElementById("event-lng").value = event.lng || "";
-        document.getElementById("event-price").value = event.price || 0;
-        document.getElementById("event-age").value = event.age_restriction || 0;
-        document.getElementById("event-image").value = event.image_url || "";
-        document.getElementById("event-status").value =
-          event.status || "published";
-
-        // Render genres with current selections
-        renderGenreSelection(event);
-
-        // Scroll to form
-        document
-          .getElementById("edit-form")
-          .scrollIntoView({ behavior: "smooth" });
-      }
-
-      // Render genre selection with pre-selected genres
-      function renderGenreSelection(event) {
-        const container = document.getElementById("genre-selection");
-        container.innerHTML = "";
-
-        // Get event's current genre IDs from the genres array
-        // We need to match genre names to IDs since the API returns names
-        const eventGenreNames = event.genres || [];
-
-        availableGenres.forEach((genre) => {
-          const isSelected = eventGenreNames.includes(genre.name);
-
-          const label = document.createElement("label");
-          label.className = `genre-option ${isSelected ? "selected" : ""}`;
-          label.innerHTML = `
-                    <input type="checkbox" name="genres[]" value="${
-                      genre.id
-                    }" ${isSelected ? "checked" : ""}>
-                    <span class="genre-icon">${genre.icon}</span>
-                    <span>${genre.name}</span>
-                `;
-
-          label.addEventListener("click", function () {
-            this.classList.toggle("selected");
-          });
-
-          container.appendChild(label);
-        });
-      }
-
-      // Update event
-      document
-        .getElementById("event-form")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-
-          if (!selectedEvent) return;
-
-          const updateBtn = document.getElementById("update-btn");
-          const updateText = document.getElementById("update-text");
-          const updateLoader = document.getElementById("update-loader");
-
-          updateBtn.disabled = true;
-          updateText.style.display = "none";
-          updateLoader.style.display = "inline";
-
-          const formData = {
-            title: document.getElementById("event-title").value,
-            description: document.getElementById("event-description").value,
-            date: document.getElementById("event-date").value,
-            time: document.getElementById("event-time").value,
-            location: document.getElementById("event-location").value,
-            lat: document.getElementById("event-lat").value || null,
-            lng: document.getElementById("event-lng").value || null,
-            age_restriction: document.getElementById("event-age").value || null,
-            price: document.getElementById("event-price").value || 0,
-            image_url: document.getElementById("event-image").value || null,
-            status: document.getElementById("event-status").value,
-            genres: [],
-          };
-
-          document
-            .querySelectorAll('input[name="genres[]"]:checked')
-            .forEach((checkbox) => {
-              formData.genres.push(parseInt(checkbox.value));
-            });
-
-          try {
-            const response = await adminAuth.apiRequest(
-              `/api/admin/events. php? id=${selectedEvent.id}`,
-              {
-                method: "PUT",
-                body: JSON.stringify(formData),
-              }
-            );
-
-            const data = await response.json();
-
-            if (data.success) {
-              showAlert("Event updated successfully! ", "success");
-              await loadEvents();
-              document.getElementById("edit-form").classList.remove("active");
-              selectedEvent = null;
-            } else {
-              showAlert(data.error || "Failed to update event", "error");
-            }
-          } catch (error) {
-            console.error("Error updating event:", error);
-            showAlert("Failed to update event", "error");
-          } finally {
-            updateBtn.disabled = false;
-            updateText.style.display = "inline";
-            updateLoader.style.display = "none";
-          }
-        });
-
-      // Delete event
-      document
-        .getElementById("delete-btn")
-        .addEventListener("click", async () => {
-          if (!selectedEvent) return;
-
-          if (
-            !confirm(
-              `Are you sure you want to delete "${selectedEvent.title}"?  This action cannot be undone.`
-            )
-          ) {
-            return;
-          }
-
-          const deleteBtn = document.getElementById("delete-btn");
-          const deleteText = document.getElementById("delete-text");
-          const deleteLoader = document.getElementById("delete-loader");
-
-          deleteBtn.disabled = true;
-          deleteText.style.display = "none";
-          deleteLoader.style.display = "inline";
-
-          try {
-            const response = await adminAuth.apiRequest(
-              `/api/admin/events.php?id=${selectedEvent.id}`,
-              {
-                method: "DELETE",
-              }
-            );
-
-            const data = await response.json();
-
-            if (data.success) {
-              showAlert("Event deleted successfully!", "success");
-              await loadEvents();
-              document.getElementById("edit-form").classList.remove("active");
-              selectedEvent = null;
-            } else {
-              showAlert(data.error || "Failed to delete event", "error");
-            }
-          } catch (error) {
-            console.error("Error deleting event:", error);
-            showAlert("Failed to delete event", "error");
-          } finally {
-            deleteBtn.disabled = false;
-            deleteText.style.display = "inline";
-            deleteLoader.style.display = "none";
-          }
-        });
-
-      // Cancel editing
-      document.getElementById("cancel-btn").addEventListener("click", () => {
-        document.getElementById("edit-form").classList.remove("active");
-        document
-          .querySelectorAll(".event-card")
-          .forEach((card) => card.classList.remove("selected"));
-        selectedEvent = null;
-      });
-
-      // Show alert
-      function showAlert(message, type) {
-        const container = document.getElementById("alert-container");
-        const alert = document.createElement("div");
-        alert.className = `alert ${type}`;
-        alert.textContent = message;
-        container.innerHTML = "";
-        container.appendChild(alert);
-        alert.style.display = "block";
-
-        setTimeout(() => {
-          alert.style.display = "none";
-        }, 5000);
-      }
-    </script>
+    <script src="/scripts/admin-edit-events.js"></script>
   </body>
 </html>

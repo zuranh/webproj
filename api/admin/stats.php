@@ -18,10 +18,10 @@ $db = require __DIR__ . '/../db.php';
 require_once __DIR__ . '/../auth.php';
 
 $auth = new Auth($db);
-$auth->requireAdmin();
+$currentUser = $auth->requireAdmin();
 
 try {
-    // Ensure registrations table exists for legacy databases
+    // Ensure supporting tables exist for legacy databases
     $db->exec(
         "CREATE TABLE IF NOT EXISTS `registrations` (
             `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -38,6 +38,32 @@ try {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
     );
 
+    $db->exec(
+        "CREATE TABLE IF NOT EXISTS `event_genres` (
+            `event_id` INT NOT NULL,
+            `genre_id` INT NOT NULL,
+            PRIMARY KEY (`event_id`, `genre_id`),
+            CONSTRAINT `fk_eg_event` FOREIGN KEY (`event_id`) REFERENCES `events`(`id`) ON DELETE CASCADE,
+            CONSTRAINT `fk_eg_genre` FOREIGN KEY (`genre_id`) REFERENCES `genres`(`id`) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+    );
+
+    $db->exec(
+        "CREATE TABLE IF NOT EXISTS `admin_actions` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `admin_id` INT NOT NULL,
+            `action` VARCHAR(100) NOT NULL,
+            `target_type` VARCHAR(50),
+            `target_id` INT,
+            `details` TEXT,
+            `ip_address` VARCHAR(45),
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_admin` (`admin_id`),
+            INDEX `idx_created` (`created_at`),
+            CONSTRAINT `fk_actions_admin` FOREIGN KEY (`admin_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+    );
+
     $counts = [
         'events' => (int) $db->query('SELECT COUNT(*) FROM events')->fetchColumn(),
         'users' => (int) $db->query('SELECT COUNT(*) FROM users')->fetchColumn(),
@@ -49,6 +75,26 @@ try {
         "SELECT COUNT(*) FROM events WHERE (status IS NULL OR status NOT IN ('archived')) AND (date IS NULL OR date >= CURDATE())"
     );
     $counts['upcoming'] = (int) $upcomingStmt->fetchColumn();
+
+    $capacityStmt = $db->query(
+        "SELECT
+            COALESCE(SUM(e.capacity), 0) AS total_capacity,
+            COALESCE(SUM(e.available_spots), 0) AS total_available
+         FROM events e"
+    );
+    $capacity = $capacityStmt->fetch();
+    $counts['capacity'] = (int) ($capacity['total_capacity'] ?? 0);
+    $counts['available'] = (int) ($capacity['total_available'] ?? 0);
+
+    $genreStmt = $db->query(
+        "SELECT g.name, g.slug, COUNT(DISTINCT eg.event_id) AS event_count
+         FROM genres g
+         LEFT JOIN event_genres eg ON eg.genre_id = g.id
+         GROUP BY g.id
+         HAVING event_count > 0
+         ORDER BY event_count DESC, g.name ASC"
+    );
+    $genreBreakdown = $genreStmt->fetchAll();
 
     $recentRegistrations = $db
         ->query(
@@ -71,11 +117,28 @@ try {
         )
         ->fetchAll();
 
+    $recentActions = [];
+    if ($auth->isOwner($currentUser)) {
+        $recentActions = $db
+            ->query(
+                "SELECT a.id, a.action, a.target_type, a.target_id, a.details, a.created_at,
+                        admin.name AS admin_name
+                 FROM admin_actions a
+                 LEFT JOIN users admin ON admin.id = a.admin_id
+                 ORDER BY a.created_at DESC
+                 LIMIT 5"
+            )
+            ->fetchAll();
+    }
+
     echo json_encode([
         'success' => true,
         'counts' => $counts,
         'recentRegistrations' => $recentRegistrations,
         'recentEvents' => $recentEvents,
+        'genreBreakdown' => $genreBreakdown,
+        'recentActions' => $recentActions,
+        'role' => $currentUser['role'] ?? null,
     ]);
 } catch (Throwable $e) {
     error_log('Admin stats error: ' . $e->getMessage());
