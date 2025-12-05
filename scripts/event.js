@@ -15,6 +15,7 @@ if (!eventId) {
 let currentUser = null;
 let currentEvent = null;
 let isFavorited = false;
+let registrationStatus = "unknown";
 
 window.addEventListener("DOMContentLoaded", async () => {
   fbOnAuthStateChanged(auth, async (firebaseUser) => {
@@ -22,6 +23,7 @@ window.addEventListener("DOMContentLoaded", async () => {
       await loadCurrentUser(firebaseUser);
       updateUIForLoggedIn();
       await checkIfFavorited();
+      await refreshRegistrationState();
     }
   });
 
@@ -45,6 +47,10 @@ async function loadCurrentUser(firebaseUser) {
 function updateUIForLoggedIn() {
   if (currentUser && ["admin", "owner"].includes(currentUser.role)) {
     document.getElementById("admin-link").style.display = "block";
+  }
+  const regLink = document.getElementById("registrations-link");
+  if (regLink) {
+    regLink.style.display = "block";
   }
 }
 
@@ -76,7 +82,7 @@ function renderEvent() {
       ? event.image_url
       : `https://via.placeholder.com/1200x400?text=Event:${encodeURIComponent(event.id || eventId)}`;
   document.getElementById("event-main-image").src = imageUrl;
-  document.getElementById("event-title").textContent = event.title || "Untitled Event";
+  document.getElementById("event-title").textContent = event.title || event.name || "Untitled Event";
   document.getElementById("event-subtitle").textContent = `${
     event.location || "Location TBA"
   } • ${event.date || "Date TBA"}${event.time ? " • " + event.time : ""}`;
@@ -124,17 +130,22 @@ function renderEvent() {
       ? "Purchase your tickets today!"
       : "Free entry - Register to attend!";
 
-  const registerBtn = document.getElementById("register-btn");
-  registerBtn.replaceWith(registerBtn.cloneNode(true));
-  document
-    .getElementById("register-btn")
-    .addEventListener("click", () => alert("Registration functionality coming soon!"));
+  resetButton("register-btn").addEventListener("click", handleRegisterClick);
 
   const favoriteBtn = document.getElementById("favorite-btn");
   favoriteBtn.replaceWith(favoriteBtn.cloneNode(true));
   document.getElementById("favorite-btn").addEventListener("click", toggleFavorite);
 
+  updateRegisterButton();
+
   document.title = `${event.title || "Event"} | Event Finder`;
+}
+
+function resetButton(id) {
+  const btn = document.getElementById(id);
+  const clone = btn.cloneNode(true);
+  btn.replaceWith(clone);
+  return document.getElementById(id);
 }
 
 async function checkIfFavorited() {
@@ -203,6 +214,101 @@ async function toggleFavorite() {
     console.error("Failed to toggle favorite:", error);
     alert("Failed to update favorite");
   }
+}
+
+async function refreshRegistrationState() {
+  if (!currentUser || !eventId) return;
+
+  try {
+    const response = await fetch(`/web-proj/api/registrations.php?event_id=${encodeURIComponent(eventId)}` , {
+      headers: { "X-Firebase-UID": auth.currentUser.uid },
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Unable to load registration state");
+    }
+
+    registrationStatus = data.status || "not_registered";
+    updateRegisterButton(data.capacity);
+  } catch (error) {
+    console.error("Failed to check registration:", error);
+    setRegisterStatus(error.message, true);
+  }
+}
+
+function updateRegisterButton(capacityInfo = null) {
+  const btn = document.getElementById("register-btn");
+  if (!btn) return;
+
+  btn.disabled = false;
+  btn.textContent = "🎫 Register Now";
+  btn.classList.remove("registered");
+
+  if (capacityInfo && capacityInfo.capacity > 0) {
+    const available = capacityInfo.available;
+    if (available !== null && available <= 0) {
+      btn.disabled = true;
+      btn.textContent = "Sold Out";
+      setRegisterStatus("This event is at capacity.", true);
+      return;
+    }
+    if (available !== null) {
+      setRegisterStatus(`${available} spots remaining`);
+    }
+  }
+
+  if (registrationStatus === "registered") {
+    btn.disabled = true;
+    btn.textContent = "Registered";
+    btn.classList.add("registered");
+    setRegisterStatus("You're registered for this event!");
+  }
+}
+
+async function handleRegisterClick() {
+  if (!currentUser) {
+    alert("Please log in to register for this event.");
+    window.location.href = "/web-proj/login.html";
+    return;
+  }
+
+  const btn = document.getElementById("register-btn");
+  btn.disabled = true;
+  btn.textContent = "Registering...";
+  setRegisterStatus("");
+
+  try {
+    const response = await fetch("/web-proj/api/registrations.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Firebase-UID": auth.currentUser.uid,
+      },
+      body: JSON.stringify({ event_id: Number(eventId) }),
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || "Registration failed");
+    }
+
+    registrationStatus = data.status || "registered";
+    setRegisterStatus("Registration confirmed!");
+    updateRegisterButton();
+  } catch (error) {
+    console.error("Registration error:", error);
+    setRegisterStatus(error.message, true);
+    btn.disabled = false;
+    btn.textContent = "🎫 Register Now";
+  }
+}
+
+function setRegisterStatus(message, isError = false) {
+  const statusEl = document.getElementById("register-status");
+  if (!statusEl) return;
+  statusEl.textContent = message;
+  statusEl.classList.toggle("error", Boolean(isError));
 }
 
 function showError(message) {

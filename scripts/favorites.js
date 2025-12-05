@@ -34,6 +34,10 @@ function updateUIForLoggedIn() {
   if (currentUser && ["admin", "owner"].includes(currentUser.role)) {
     document.getElementById("admin-link").style.display = "block";
   }
+  const regLink = document.getElementById("registrations-link");
+  if (regLink) {
+    regLink.style.display = "block";
+  }
 }
 
 function showAuthRequired() {

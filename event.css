@@ -203,6 +203,17 @@ main#main-content {
     box-shadow: 0 8px 16px rgba(0,123,255,0.4);
 }
 
+#register-btn.registered,
+#register-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+#register-btn.registered {
+    background: #218838;
+    box-shadow: none;
+}
+
 #favorite-btn {
     background: #ffd700;
     color: #111;
@@ -210,6 +221,16 @@ main#main-content {
 
 #favorite-btn:hover {
     background: #e6c200;
+}
+
+.status-text {
+    font-size: 0.95rem;
+    color: #0a7f2e;
+    min-height: 1.2em;
+}
+
+.status-text.error {
+    color: #c0392b;
 }
 
 /* ========================== */

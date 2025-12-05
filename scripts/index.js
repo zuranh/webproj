@@ -41,6 +41,7 @@ function updateUIForLoggedIn() {
   document.getElementById("login-btn").style.display = "none";
   document.getElementById("user-menu").style.display = "block";
   document.getElementById("favorites-link").style.display = "block";
+  document.getElementById("registrations-link").style.display = "block";
   document.getElementById("profile-link").style.display = "block";
   if (currentUser) {
     const avatar = document.getElementById("user-avatar");
@@ -58,6 +59,7 @@ function updateUIForLoggedOut() {
   document.getElementById("login-btn").style.display = "block";
   document.getElementById("user-menu").style.display = "none";
   document.getElementById("favorites-link").style.display = "none";
+  document.getElementById("registrations-link").style.display = "none";
   document.getElementById("profile-link").style.display = "none";
   document.getElementById("admin-link").style.display = "none";
 }
