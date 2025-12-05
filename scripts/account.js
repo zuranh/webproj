@@ -40,6 +40,10 @@ async function loadProfile() {
       document.getElementById("user-email").textContent =
         userData.email || user.email;
       document.getElementById("user-age").textContent = userData.age ?? "N/A";
+      document.getElementById("user-location").textContent =
+        userData.location || "N/A";
+      document.getElementById("user-phone").textContent = userData.phone || "N/A";
+      document.getElementById("user-bio").textContent = userData.bio || "Add a short bio";
       document.getElementById("user-joined").textContent = userData.joined_at
         ? new Date(userData.joined_at).toLocaleDateString()
         : "N/A";

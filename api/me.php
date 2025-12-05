@@ -64,7 +64,9 @@ try {
     // fixed: remove stray space in filename
     $db = require __DIR__ . '/db.php';
 
-    $stmt = $db->prepare('SELECT id, name, email, age, role, joined_at FROM users WHERE firebase_uid = :uid');
+    ensureProfileColumns($db);
+
+    $stmt = $db->prepare('SELECT id, name, email, age, phone, location, bio, role, joined_at FROM users WHERE firebase_uid = :uid');
     $stmt->execute([':uid' => $firebaseUid]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -79,6 +81,32 @@ try {
     http_response_code(500);
     // Avoid leaking stack traces in production; consider logging $e->getMessage()
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+}
+
+/**
+ * Ensure optional profile columns exist even if the database was created
+ * before these fields were added. Safe to run on every request.
+ */
+function ensureProfileColumns(PDO $db): void
+{
+    $missing = [];
+    foreach (['phone' => 'VARCHAR(30)', 'location' => 'VARCHAR(191)', 'bio' => 'TEXT'] as $column => $definition) {
+        if (!columnExists($db, $column)) {
+            $missing[] = "ADD COLUMN `$column` $definition NULL";
+        }
+    }
+
+    if (!empty($missing)) {
+        $sql = 'ALTER TABLE users ' . implode(', ', $missing);
+        $db->exec($sql);
+    }
+}
+
+function columnExists(PDO $db, string $column): bool
+{
+    $stmt = $db->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = :column");
+    $stmt->execute([':column' => $column]);
+    return (bool) $stmt->fetchColumn();
 }
 
 /**

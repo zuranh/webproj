@@ -2,7 +2,7 @@
 /**
  * Profile Update API
  * POST /api/profile-update.php
- * Body (JSON): { "name": "New Name", "age": 21 }
+ * Body (JSON): { "name": "New Name", "age": 21, "phone": "+1 555-1234", "location": "Toronto, CA", "bio": "Short bio" }
  * Auth: X-Firebase-UID header or Authorization: Bearer <idToken>
  */
 
@@ -65,6 +65,9 @@ try {
 
     $name = isset($data['name']) ? trim($data['name']) : '';
     $age = $data['age'] ?? null;
+    $phone = isset($data['phone']) ? trim((string) $data['phone']) : null;
+    $location = isset($data['location']) ? trim((string) $data['location']) : null;
+    $bio = isset($data['bio']) ? trim((string) $data['bio']) : null;
 
     $errors = [];
 
@@ -87,6 +90,32 @@ try {
         $age = null;
     }
 
+    if ($phone !== null && $phone !== '') {
+        if (mb_strlen($phone) > 30) {
+            $errors[] = 'Phone is too long (max 30 characters)';
+        } elseif (!preg_match('/^[+0-9()\s-]+$/', $phone)) {
+            $errors[] = 'Phone may only contain numbers, spaces, +, -, and parentheses';
+        }
+    } else {
+        $phone = null;
+    }
+
+    if ($location !== null && $location !== '') {
+        if (mb_strlen($location) > 191) {
+            $errors[] = 'Location is too long (max 191 characters)';
+        }
+    } else {
+        $location = null;
+    }
+
+    if ($bio !== null && $bio !== '') {
+        if (mb_strlen($bio) > 500) {
+            $errors[] = 'Bio is too long (max 500 characters)';
+        }
+    } else {
+        $bio = null;
+    }
+
     if (!empty($errors)) {
         http_response_code(422);
         echo json_encode(['success' => false, 'error' => implode('. ', $errors)]);
@@ -95,10 +124,15 @@ try {
 
     $db = require __DIR__ . '/db.php';
 
-    $stmt = $db->prepare('UPDATE users SET name = :name, age = :age WHERE firebase_uid = :uid');
+    ensureProfileColumns($db);
+
+    $stmt = $db->prepare('UPDATE users SET name = :name, age = :age, phone = :phone, location = :location, bio = :bio WHERE firebase_uid = :uid');
     $stmt->execute([
         ':name' => $name,
         ':age' => $age,
+        ':phone' => $phone,
+        ':location' => $location,
+        ':bio' => $bio,
         ':uid' => $firebaseUid,
     ]);
 
@@ -112,7 +146,7 @@ try {
         }
     }
 
-    $stmt2 = $db->prepare('SELECT id, name, email, age, role, joined_at FROM users WHERE firebase_uid = :uid');
+    $stmt2 = $db->prepare('SELECT id, name, email, age, phone, location, bio, role, joined_at FROM users WHERE firebase_uid = :uid');
     $stmt2->execute([':uid' => $firebaseUid]);
     $user = $stmt2->fetch(PDO::FETCH_ASSOC);
 
@@ -132,6 +166,32 @@ try {
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'Server error while updating profile']);
     exit;
+}
+
+/**
+ * Ensure optional profile columns exist even if the database was created
+ * before these fields were added. Safe to run on every request.
+ */
+function ensureProfileColumns(PDO $db): void
+{
+    $missing = [];
+    foreach (['phone' => 'VARCHAR(30)', 'location' => 'VARCHAR(191)', 'bio' => 'TEXT'] as $column => $definition) {
+        if (!columnExists($db, $column)) {
+            $missing[] = "ADD COLUMN `$column` $definition NULL";
+        }
+    }
+
+    if (!empty($missing)) {
+        $sql = 'ALTER TABLE users ' . implode(', ', $missing);
+        $db->exec($sql);
+    }
+}
+
+function columnExists(PDO $db, string $column): bool
+{
+    $stmt = $db->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = :column");
+    $stmt->execute([':column' => $column]);
+    return (bool) $stmt->fetchColumn();
 }
 
 function verifyFirebaseTokenFromHeader(string $authHeader): ?array

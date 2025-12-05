@@ -5,6 +5,9 @@ let currentFirebaseUser = null;
 
 const nameInput = document.getElementById("edit-name");
 const ageInput = document.getElementById("edit-age");
+const phoneInput = document.getElementById("edit-phone");
+const locationInput = document.getElementById("edit-location");
+const bioInput = document.getElementById("edit-bio");
 const form = document.getElementById("edit-form");
 const cancelBtn = document.getElementById("cancel-btn");
 const statusMsg = document.getElementById("status-msg");
@@ -33,6 +36,9 @@ async function loadProfile() {
   const user = data.user;
   nameInput.value = user.name || "";
   ageInput.value = user.age ?? "";
+  phoneInput.value = user.phone || "";
+  locationInput.value = user.location || "";
+  bioInput.value = user.bio || "";
 }
 
 async function saveProfile(event) {
@@ -41,6 +47,9 @@ async function saveProfile(event) {
   const payload = {
     name: nameInput.value.trim(),
     age: ageInput.value === "" ? null : Number(ageInput.value),
+    phone: phoneInput.value.trim(),
+    location: locationInput.value.trim(),
+    bio: bioInput.value.trim(),
   };
 
   const idToken = await currentFirebaseUser.getIdToken();

@@ -21,6 +21,40 @@
         <input type="number" id="edit-age" min="0" max="120" />
       </div>
 
+      <div class="form-group">
+        <label for="edit-location">Location</label>
+        <input
+          type="text"
+          id="edit-location"
+          name="location"
+          maxlength="191"
+          placeholder="City, Country"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="edit-phone">Phone</label>
+        <input
+          type="tel"
+          id="edit-phone"
+          name="phone"
+          maxlength="30"
+          placeholder="e.g., +1 555 123 4567"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="edit-bio">Bio</label>
+        <textarea
+          id="edit-bio"
+          name="bio"
+          rows="4"
+          maxlength="500"
+          placeholder="Tell people a little about yourself, your interests, or the events you enjoy."
+        ></textarea>
+        <small class="helper-text">Up to 500 characters.</small>
+      </div>
+
       <button type="submit" class="save-btn">Save Changes</button>
       <button type="button" class="cancel-btn" id="cancel-btn">Cancel</button>
     </form>
