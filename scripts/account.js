@@ -4,6 +4,8 @@ import {
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
+const editProfileBtn = document.getElementById("edit-profile-btn");
+
 // Load user profile
 async function loadProfile() {
   onAuthStateChanged(auth, async (user) => {
@@ -61,5 +63,12 @@ if (logoutBtn) {
       console.error("Logout error:", error);
       alert("Logout failed: " + error.message);
     }
+  });
+}
+
+// Edit profile navigation
+if (editProfileBtn) {
+  editProfileBtn.addEventListener("click", () => {
+    window.location.href = "edit-profile.html";
   });
 }

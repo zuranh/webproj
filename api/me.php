@@ -56,7 +56,7 @@ if (!$firebaseUid) {
 
 if (!$firebaseUid) {
     http_response_code(401);
-    echo json_encode(['error' => 'Not authenticated']);
+    echo json_encode(['success' => false, 'error' => 'Not authenticated']);
     exit;
 }
 
@@ -70,15 +70,15 @@ try {
 
     if (!$user) {
         http_response_code(404);
-        echo json_encode(['error' => 'User not found in database']);
+        echo json_encode(['success' => false, 'error' => 'User not found in database']);
         exit;
     }
 
-    echo json_encode(['user' => $user]);
+    echo json_encode(['success' => true, 'user' => $user]);
 } catch (Exception $e) {
     http_response_code(500);
     // Avoid leaking stack traces in production; consider logging $e->getMessage()
-    echo json_encode(['error' => $e->getMessage()]);
+    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
 
 /**

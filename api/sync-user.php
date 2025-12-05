@@ -29,37 +29,45 @@ if (!$firebaseUser) {
 }
 
 // Get request data
-$data = json_decode(file_get_contents('php://input'), true);
+$data = json_decode(file_get_contents('php://input'), true) ?: [];
 $uid = $firebaseUser['localId'];
 $email = $firebaseUser['email'] ?? '';
-$name = $data['name'] ?? '';
-$age = $data['age'] ?? null;
+$hasName = array_key_exists('name', $data);
+$hasAge = array_key_exists('age', $data);
+$name = $hasName ? trim((string) $data['name']) : null;
+$age = $hasAge ? $data['age'] : null;
 
 try {
     $db = require __DIR__ . '/db.php';
     
     // Check if user exists
-    $stmt = $db->prepare('SELECT id FROM users WHERE firebase_uid = :uid');
+    $stmt = $db->prepare('SELECT id, name, email, age FROM users WHERE firebase_uid = :uid');
     $stmt->execute([':uid' => $uid]);
     $existing = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
     if ($existing) {
+        $nameToSave = $hasName ? $name : $existing['name'];
+        $ageToSave = $hasAge ? $age : $existing['age'];
+
         // Update existing user
         $stmt = $db->prepare('UPDATE users SET name = :name, email = :email, age = :age WHERE firebase_uid = :uid');
         $stmt->execute([
             ':uid' => $uid,
-            ':name' => $name,
-            ':email' => $email,
-            ':age' => $age
+            ':name' => $nameToSave,
+            ':email' => $email ?: $existing['email'],
+            ':age' => $ageToSave
         ]);
         $userId = $existing['id'];
     } else {
+        $nameToSave = $name ?? ($firebaseUser['displayName'] ?? 'User');
+        $ageToSave = $hasAge ? $age : null;
+
         // Insert new user
         $stmt = $db->prepare('INSERT INTO users (name, email, age, firebase_uid, role, joined_at) VALUES (:name, :email, :age, :uid, :role, :joined)');
         $stmt->execute([
-            ':name' => $name,
+            ':name' => $nameToSave,
             ':email' => $email,
-            ':age' => $age,
+            ':age' => $ageToSave,
             ':uid' => $uid,
             ':role' => 'user',
             ':joined' => date('c')
