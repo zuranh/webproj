@@ -158,8 +158,12 @@ signupForm.addEventListener("submit", async (e) => {
 
   // Client-side validation
   const clientErrors = [];
+  nameEl.setCustomValidity("");
   if (!name) clientErrors.push("Full name is required");
-  else if (!isFullName(name)) clientErrors.push("Enter your first and last name");
+  else if (!isFullName(name)) {
+    clientErrors.push("Enter your first and last name");
+    nameEl.setCustomValidity("Please enter your first and last name.");
+  }
   if (!email) clientErrors.push("Email is required");
   else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
     clientErrors.push("Enter a valid email");
@@ -175,10 +179,15 @@ signupForm.addEventListener("submit", async (e) => {
   if (clientErrors.length) {
     errorEl.textContent = clientErrors.join(". ");
     errorEl.style.display = "block";
+    if (!isFullName(name)) {
+      nameEl.reportValidity();
+    }
     return;
   }
 
   try {
+    const normalizedName = name.replace(/\s+/g, " ");
+
     // Create user in Firebase
     const userCredential = await createUserWithEmailAndPassword(
       auth,
@@ -188,7 +197,13 @@ signupForm.addEventListener("submit", async (e) => {
     const user = userCredential.user;
 
     // Persist the provided full name into the Firebase profile for downstream flows
-    await updateProfile(user, { displayName: name });
+    await updateProfile(user, { displayName: normalizedName });
+
+    const profileName = user.displayName?.trim() || normalizedName;
+    if (!isFullName(profileName)) {
+      await signOut(auth);
+      throw new Error("Full name is required to complete sign up.");
+    }
 
     // Get Firebase ID token
     const idToken = await user.getIdToken();
@@ -203,7 +218,7 @@ signupForm.addEventListener("submit", async (e) => {
       body: JSON.stringify({
         uid: user.uid,
         email: user.email,
-        name: name,
+        name: normalizedName,
         age: parseInt(age),
       }),
     });

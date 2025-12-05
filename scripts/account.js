@@ -3,7 +3,6 @@ import {
   onAuthStateChanged,
   deleteUser,
   signOut,
-  updateProfile,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const editProfileBtn = document.getElementById("edit-profile-btn");
@@ -30,23 +29,12 @@ async function syncUserRecord(user) {
   let nameToSend = user.displayName?.trim() || "";
 
   if (!isFullName(nameToSend)) {
-    const provided = prompt(
-      "Please enter your full name (first and last) to finish setting up your account:",
-      nameToSend
+    throw new Error(
+      "A valid full name is required. Please sign out and sign up again with your full name."
     );
-
-    if (!provided || !isFullName(provided)) {
-      throw new Error("Full name is required to continue");
-    }
-
-    nameToSend = provided.trim().replace(/\s+/g, " ");
-
-    try {
-      await updateProfile(user, { displayName: nameToSend });
-    } catch (err) {
-      console.warn("Could not persist name to Firebase profile", err);
-    }
   }
+
+  nameToSend = nameToSend.replace(/\s+/g, " ");
 
   const res = await fetch("api/sync-user.php", {
     method: "POST",
