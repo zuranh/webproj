@@ -68,6 +68,8 @@
             type="text"
             id="fullname"
             placeholder="First and last name"
+            pattern="^[A-Za-z]+(?:[\s'-][A-Za-z]+)+$"
+            title="Enter your first and last name"
             required
           />
         </div>
@@ -95,6 +97,8 @@
             placeholder="Min 8 chars, upper/lower/number/symbol"
             required
             minlength="8"
+            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$"
+            title="Must include upper & lower case letters, a number, and a symbol"
           />
         </div>
 
@@ -105,6 +109,7 @@
             id="confirm-password"
             placeholder="••••••••"
             required
+            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$"
           />
         </div>
 

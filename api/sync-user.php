@@ -42,9 +42,12 @@ if ($hasName) {
     if ($name === '') {
         $errors[] = 'Full name is required';
     } else {
-        $parts = preg_split('/\s+/', $name);
+        $parts = preg_split('/\s+/', $name, -1, PREG_SPLIT_NO_EMPTY);
+        $validParts = array_filter($parts, fn($part) => preg_match("/^[A-Za-z][A-Za-z'\\-]{1,}$/", $part));
         if (count($parts) < 2) {
             $errors[] = 'Please provide first and last name';
+        } elseif (count($validParts) !== count($parts)) {
+            $errors[] = 'Names should only include letters (plus optional hyphen/apostrophe)';
         }
     }
 }

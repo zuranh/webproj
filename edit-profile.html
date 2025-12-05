@@ -13,7 +13,13 @@
     <form id="edit-form">
       <div class="form-group">
         <label for="edit-name">Name</label>
-        <input type="text" id="edit-name" required />
+        <input
+          type="text"
+          id="edit-name"
+          required
+          pattern="^[A-Za-z]+(?:[\s'-][A-Za-z]+)+$"
+          title="Enter your first and last name"
+        />
       </div>
 
       <div class="form-group">

@@ -13,8 +13,12 @@ const switchToLogin = document.getElementById("switch-to-login");
 
 function isFullName(value) {
   if (!value) return false;
-  const parts = value.trim().split(/\s+/);
-  return parts.length >= 2 && parts.every((part) => part.length >= 2);
+  const parts = value
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  if (parts.length < 2) return false;
+  return parts.every((part) => /^[A-Za-z][A-Za-z'\-]{1,}$/.test(part));
 }
 
 function isStrongPassword(value) {
