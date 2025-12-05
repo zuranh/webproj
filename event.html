@@ -321,14 +321,15 @@
 
           <!-- Right Column -->
           <aside class="ticket-box">
-            <div class="ticket-card">
-              <h3>🎟️ Tickets & Registration</h3>
-              <div class="price-display" id="ticket-price">$0.00</div>
-              <p id="ticket-info">Get your tickets now!</p>
-              <button id="register-btn">🎫 Register Now</button>
-              <button id="favorite-btn">♡ Add to Favorites</button>
-            </div>
-          </aside>
+          <div class="ticket-card">
+            <h3>🎟️ Tickets & Registration</h3>
+            <div class="price-display" id="ticket-price">$0.00</div>
+            <p id="ticket-info">Get your tickets now!</p>
+            <p id="registration-status" aria-live="polite" style="min-height: 20px; margin: 0 0 10px 0;"></p>
+            <button id="register-btn">🎫 Register Now</button>
+            <button id="favorite-btn">♡ Add to Favorites</button>
+          </div>
+        </aside>
         </div>
       </main>
     </div>
@@ -368,6 +369,7 @@
       let currentUser = null;
       let currentEvent = null;
       let isFavorited = false;
+      let registrationState = { checked: false, registered: false };
 
       // Initialize after DOM loads
       window.addEventListener("DOMContentLoaded", async () => {
@@ -385,6 +387,7 @@
                 await loadCurrentUser(firebaseUser);
                 updateUIForLoggedIn();
                 await checkIfFavorited();
+                await checkRegistrationStatus();
               } else {
                 // not signed in - still load event
               }
@@ -519,15 +522,15 @@
         registerBtn.replaceWith(registerBtn.cloneNode(true));
         document
           .getElementById("register-btn")
-          .addEventListener("click", () => {
-            alert("Registration functionality coming soon!");
-          });
+          .addEventListener("click", handleRegistrationClick);
 
         const favoriteBtn = document.getElementById("favorite-btn");
         favoriteBtn.replaceWith(favoriteBtn.cloneNode(true));
         document
           .getElementById("favorite-btn")
           .addEventListener("click", toggleFavorite);
+
+        updateRegisterButton();
 
         // Update page title
         document.title = `${event.title || "Event"} | Event Finder`;
@@ -550,6 +553,97 @@
           }
         } catch (error) {
           console.error("Failed to check favorites:", error);
+        }
+      }
+
+      async function checkRegistrationStatus() {
+        if (!currentUser || !eventId) return;
+
+        const firebaseUser = window.firebaseAuth.currentUser;
+        try {
+          const response = await fetch(
+            `/web-proj/api/registrations.php?event_id=${encodeURIComponent(
+              eventId
+            )}`,
+            {
+              headers: {
+                "X-Firebase-UID": firebaseUser.uid,
+              },
+            }
+          );
+
+          const data = await response.json();
+          if (data.success) {
+            registrationState = {
+              checked: true,
+              registered: !!data.registered,
+            };
+            updateRegisterButton();
+          }
+        } catch (error) {
+          console.error("Failed to check registration:", error);
+        }
+      }
+
+      function updateRegisterButton(message = "") {
+        const btn = document.getElementById("register-btn");
+        const status = document.getElementById("registration-status");
+        if (!btn || !status) return;
+
+        if (registrationState.registered) {
+          btn.textContent = "✅ Registered";
+          btn.disabled = true;
+          status.style.color = "#2f855a";
+          status.textContent = message || "You are registered for this event.";
+        } else {
+          btn.textContent = "🎫 Register Now";
+          btn.disabled = false;
+          status.style.color = "";
+          status.textContent = message;
+        }
+      }
+
+      async function handleRegistrationClick() {
+        if (!currentUser) {
+          alert("Please log in to register");
+          window.location.href = "/web-proj/login.html";
+          return;
+        }
+
+        const btn = document.getElementById("register-btn");
+        const status = document.getElementById("registration-status");
+        if (!btn || !status) return;
+
+        btn.disabled = true;
+        status.style.color = "#4a5568";
+        status.textContent = "Submitting registration...";
+
+        try {
+          const firebaseUser = window.firebaseAuth.currentUser;
+          const response = await fetch("/web-proj/api/registrations.php", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Firebase-UID": firebaseUser.uid,
+            },
+            body: JSON.stringify({ event_id: parseInt(eventId, 10) }),
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            registrationState.registered = true;
+            updateRegisterButton(data.message || "Registration successful");
+          } else {
+            btn.disabled = false;
+            status.style.color = "#c53030";
+            status.textContent = data.error || "Registration failed";
+          }
+        } catch (error) {
+          console.error("Registration failed:", error);
+          btn.disabled = false;
+          status.style.color = "#c53030";
+          status.textContent = "Could not register. Please try again.";
         }
       }
 
