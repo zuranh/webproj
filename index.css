@@ -389,3 +389,138 @@ footer {
 footer a {
     color: #0ab4ff;
 }
+
+/* Genre filter chips and card enhancements */
+.genre-filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+    justify-content: center;
+}
+
+.genre-chip {
+    padding: 10px 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 25px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.genre-chip:hover {
+    border-color: #667eea;
+    background: #f0f3ff;
+    transform: translateY(-2px);
+}
+
+.genre-chip.active {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.event-card {
+    position: relative;
+}
+
+.event-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.event-price {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    color: #333;
+}
+
+.event-genres {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+}
+
+.event-genre-tag {
+    background: #f0f0f0;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.favorite-btn {
+    transition: all 0.3s;
+}
+
+.favorite-btn.favorited {
+    background: #ff6b6b;
+    color: white;
+}
+
+.favorite-btn.favorited:hover {
+    background: #ff5252;
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 60px;
+    color: #999;
+    font-size: 1.2rem;
+}
+
+.no-events {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.event-distance {
+    color: #667eea;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.user-menu {
+    position: relative;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.admin-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff6b6b;
+    color: white;
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: bold;
+}
