@@ -82,8 +82,8 @@ try {
             $errors[] = 'Age must be a number';
         } else {
             $age = (int) $age;
-            if ($age < 0 || $age > 120) {
-                $errors[] = 'Age must be between 0 and 120';
+            if ($age < 13 || $age > 120) {
+                $errors[] = 'Age must be between 13 and 120';
             }
         }
     } else {

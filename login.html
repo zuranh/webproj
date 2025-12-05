@@ -64,12 +64,17 @@
       <form id="signup-form" class="auth-form">
         <div class="form-group">
           <label for="fullname">Full Name</label>
-          <input type="text" id="fullname" placeholder="John Doe" required />
+          <input
+            type="text"
+            id="fullname"
+            placeholder="First and last name"
+            required
+          />
         </div>
 
         <div class="form-group">
           <label for="age">Age</label>
-          <input type="number" id="age" min="1" placeholder="18" required />
+          <input type="number" id="age" min="13" placeholder="18" required />
         </div>
 
         <div class="form-group">
@@ -87,8 +92,9 @@
           <input
             type="password"
             id="signup-password"
-            placeholder="••••••••"
+            placeholder="Min 8 chars, upper/lower/number/symbol"
             required
+            minlength="8"
           />
         </div>
 

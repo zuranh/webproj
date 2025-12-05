@@ -11,6 +11,17 @@ const signupForm = document.getElementById("signup-form");
 const switchToSignup = document.getElementById("switch-to-signup");
 const switchToLogin = document.getElementById("switch-to-login");
 
+function isFullName(value) {
+  if (!value) return false;
+  const parts = value.trim().split(/\s+/);
+  return parts.length >= 2 && parts.every((part) => part.length >= 2);
+}
+
+function isStrongPassword(value) {
+  // At least one uppercase, one lowercase, one digit, one symbol, and 8+ characters
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(value);
+}
+
 function showLogin() {
   loginForm.classList.add("active");
   signupForm.classList.remove("active");
@@ -137,16 +148,19 @@ signupForm.addEventListener("submit", async (e) => {
 
   // Client-side validation
   const clientErrors = [];
-  if (!name) clientErrors.push("Name is required");
+  if (!name) clientErrors.push("Full name is required");
+  else if (!isFullName(name)) clientErrors.push("Enter your first and last name");
   if (!email) clientErrors.push("Email is required");
   else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
     clientErrors.push("Enter a valid email");
   if (!password) clientErrors.push("Password is required");
-  else if (password.length < 6)
-    clientErrors.push("Password must be at least 6 characters");
+  else if (!isStrongPassword(password))
+    clientErrors.push(
+      "Password must be 8+ chars with upper, lower, number, and symbol"
+    );
   if (password !== confirm) clientErrors.push("Passwords do not match");
-  if (!age || isNaN(age) || parseInt(age) < 1)
-    clientErrors.push("Valid age is required");
+  if (!age || isNaN(age) || parseInt(age) < 13)
+    clientErrors.push("Age must be 13 or older");
 
   if (clientErrors.length) {
     errorEl.textContent = clientErrors.join(". ");

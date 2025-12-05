@@ -37,6 +37,34 @@ $hasAge = array_key_exists('age', $data);
 $name = $hasName ? trim((string) $data['name']) : null;
 $age = $hasAge ? $data['age'] : null;
 
+$errors = [];
+if ($hasName) {
+    if ($name === '') {
+        $errors[] = 'Full name is required';
+    } else {
+        $parts = preg_split('/\s+/', $name);
+        if (count($parts) < 2) {
+            $errors[] = 'Please provide first and last name';
+        }
+    }
+}
+if ($hasAge) {
+    if (!is_numeric($age)) {
+        $errors[] = 'Age must be a number';
+    } else {
+        $age = (int) $age;
+        if ($age < 13 || $age > 120) {
+            $errors[] = 'Age must be between 13 and 120';
+        }
+    }
+}
+
+if (!empty($errors)) {
+    http_response_code(422);
+    echo json_encode(['error' => implode('. ', $errors)]);
+    exit;
+}
+
 try {
     $db = require __DIR__ . '/db.php';
     

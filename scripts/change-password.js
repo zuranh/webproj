@@ -16,6 +16,11 @@ const saveBtn = document.getElementById("save-password-btn");
 
 let currentUser = null;
 
+function isStrongPassword(value) {
+  // At least one uppercase, one lowercase, one digit, one symbol, and 8+ characters
+  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(value);
+}
+
 function setStatus(message, color = "#d9534f") {
   statusEl.textContent = message;
   statusEl.style.color = color;
@@ -46,8 +51,10 @@ form?.addEventListener("submit", async (e) => {
   const errors = [];
   if (!currentPassword) errors.push("Current password is required");
   if (!newPassword) errors.push("New password is required");
-  if (newPassword && newPassword.length < 6)
-    errors.push("New password must be at least 6 characters");
+  if (newPassword && !isStrongPassword(newPassword))
+    errors.push(
+      "New password must be 8+ chars with upper, lower, number, and symbol"
+    );
   if (newPassword === currentPassword)
     errors.push("New password must be different from current password");
   if (newPassword !== confirmPassword)
