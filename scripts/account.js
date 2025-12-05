@@ -3,6 +3,7 @@ import {
   onAuthStateChanged,
   deleteUser,
   signOut,
+  updateProfile,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const editProfileBtn = document.getElementById("edit-profile-btn");
@@ -10,9 +11,43 @@ const changePasswordBtn = document.getElementById("change-password-btn");
 const deleteAccountBtn = document.getElementById("delete-account-btn");
 let currentUser = null;
 
+function isFullName(value) {
+  if (!value) return false;
+  const trimmed = value.trim();
+  const parts = trimmed.split(/\s+/).filter(Boolean);
+  if (parts.length < 2) return false;
+
+  const partOk = parts.every((part) => /^[A-Za-z][A-Za-z'\-]{1,}[A-Za-z]$/.test(part));
+  if (!partOk) return false;
+
+  return trimmed.replace(/\s+/g, " ").length >= 5;
+}
+
 // Ensure a database record exists for the signed-in Firebase user.
 async function syncUserRecord(user) {
   const idToken = await user.getIdToken();
+
+  let nameToSend = user.displayName?.trim() || "";
+
+  if (!isFullName(nameToSend)) {
+    const provided = prompt(
+      "Please enter your full name (first and last) to finish setting up your account:",
+      nameToSend
+    );
+
+    if (!provided || !isFullName(provided)) {
+      throw new Error("Full name is required to continue");
+    }
+
+    nameToSend = provided.trim().replace(/\s+/g, " ");
+
+    try {
+      await updateProfile(user, { displayName: nameToSend });
+    } catch (err) {
+      console.warn("Could not persist name to Firebase profile", err);
+    }
+  }
+
   const res = await fetch("api/sync-user.php", {
     method: "POST",
     headers: {
@@ -22,7 +57,7 @@ async function syncUserRecord(user) {
     body: JSON.stringify({
       uid: user.uid,
       email: user.email,
-      name: user.displayName || undefined,
+      name: nameToSend,
     }),
   });
 
