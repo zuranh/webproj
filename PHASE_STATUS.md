@@ -19,6 +19,13 @@ Evidence:
 - Event page Register button calls the API, reflects sold-out/registered states, and surfaces status messaging (including cancel flow).【F:scripts/event.js†L18-L186】【F:event.html†L93-L105】
 - “My Registrations” page lists sign-ups with cancel actions and navigation links; users can view and cancel registrations successfully.【F:registrations.html†L1-L49】【F:scripts/registrations.js†L1-L132】
 
+## Phase 5: Admin & Owner Features
+Status: **In Progress**
+
+Evidence (current):
+- Admin dashboard now surfaces aggregate counts for events, users, registrations, and cancellations plus upcoming events.【F:api/admin/stats.php†L1-L92】【F:scripts/admin-dashboard.js†L1-L106】
+- Recent registrations and latest events render in the admin panel with status pills for quick scanning.【F:admin.html†L21-L104】【F:admin-page.css†L86-L140】
+
 ## Recommended Next Steps
 Proceed to **Phase 5 (Admin & Owner Features)**:
 - Build dashboard metrics (events/users/registrations), recent activity, and quick actions.

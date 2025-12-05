@@ -161,6 +161,68 @@ body {
 }
 
 /* =============================== */
+/*            DASHBOARD           */
+/* =============================== */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+.stat-label {
+  color: #c5c5c5;
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.stat-sub {
+  color: #9fb7ff;
+  font-size: 0.95rem;
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.panel-header h3 {
+  font-size: 1.2rem;
+}
+
+.panel-link {
+  color: #9fc7ff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* =============================== */
 /*         RESPONSIVENESS         */
 /* =============================== */
 
@@ -276,8 +338,8 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background: white;
-  border-bottom: 2px solid #f0f0f0;
+  background: rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   margin-bottom: 2rem;
 }
 
@@ -289,5 +351,45 @@ body {
 
 .admin-user-name {
   font-weight: 600;
-  color: #333;
+  color: #f5f5f5;
+}
+
+.loading-row,
+.empty-row,
+.error-row {
+  text-align: center;
+  color: #cfcfcf;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  text-transform: capitalize;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.status-registered {
+  background: rgba(46, 204, 113, 0.2);
+  border-color: rgba(46, 204, 113, 0.35);
+  color: #c7f7d6;
+}
+
+.status-canceled {
+  background: rgba(231, 76, 60, 0.2);
+  border-color: rgba(231, 76, 60, 0.35);
+  color: #f5b7b1;
+}
+
+.status-published {
+  background: rgba(52, 152, 219, 0.2);
+  border-color: rgba(52, 152, 219, 0.35);
+  color: #c7e9ff;
+}
+
+.status-draft,
+.status-archived {
+  background: rgba(255, 255, 255, 0.08);
 }
