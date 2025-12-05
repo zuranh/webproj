@@ -24,6 +24,23 @@ try {
     $auth = new Auth($db);
     $method = $_SERVER['REQUEST_METHOD'];
 
+    // Ensure admin_actions table exists for logging on legacy databases
+    $db->exec(
+        "CREATE TABLE IF NOT EXISTS `admin_actions` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `admin_id` INT NOT NULL,
+            `action` VARCHAR(100) NOT NULL,
+            `target_type` VARCHAR(50),
+            `target_id` INT,
+            `details` TEXT,
+            `ip_address` VARCHAR(45),
+            `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+            INDEX `idx_admin` (`admin_id`),
+            INDEX `idx_created` (`created_at`),
+            CONSTRAINT `fk_actions_admin` FOREIGN KEY (`admin_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+    );
+
     // GET - View all users (requires admin)
     if ($method === 'GET') {
         $currentUser = $auth->requireAdmin();

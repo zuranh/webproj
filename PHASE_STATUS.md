@@ -25,6 +25,8 @@ Status: **In Progress**
 Evidence (current):
 - Admin dashboard now surfaces aggregate counts for events, users, registrations, and cancellations plus upcoming events.【F:api/admin/stats.php†L1-L92】【F:scripts/admin-dashboard.js†L1-L106】
 - Recent registrations and latest events render in the admin panel with status pills for quick scanning.【F:admin.html†L21-L104】【F:admin-page.css†L86-L140】
+- Owner-only user management now loads, edits, and activates/deactivates users with refreshed styling and action logging via the admin users API.【F:admin-users.html†L1-L66】【F:scripts/admin-users.js†L1-L170】【F:api/admin/users.php†L1-L127】
+- Admin actions log exposes recent privileged activity for auditing through an owner-gated API and dashboard page.【F:api/admin/actions.php†L1-L71】【F:admin-actions.html†L1-L61】【F:scripts/admin-actions.js†L1-L69】
 
 ## Recommended Next Steps
 Proceed to **Phase 5 (Admin & Owner Features)**:

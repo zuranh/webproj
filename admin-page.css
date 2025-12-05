@@ -55,6 +55,12 @@ body {
   color: #fff;
 }
 
+.nav-link.active {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-weight: 700;
+}
+
 /* =============================== */
 /*            MAIN AREA           */
 /* =============================== */
