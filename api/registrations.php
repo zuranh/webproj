@@ -16,6 +16,41 @@ function json_response(int $code, array $payload): void {
 
 try {
     $db = require __DIR__ . '/db.php';
+
+    // Ensure required tables/columns exist for older databases
+    $db->exec('CREATE TABLE IF NOT EXISTS `registrations` (
+        `id` INT AUTO_INCREMENT PRIMARY KEY,
+        `user_id` INT NOT NULL,
+        `event_id` INT NOT NULL,
+        `status` ENUM("registered","cancelled") DEFAULT "registered",
+        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+        `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY `unique_user_registration` (`user_id`, `event_id`),
+        INDEX `idx_reg_user` (`user_id`),
+        INDEX `idx_reg_event` (`event_id`),
+        CONSTRAINT `fk_reg_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+        CONSTRAINT `fk_reg_event` FOREIGN KEY (`event_id`) REFERENCES `events`(`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;');
+
+    // Backfill event capacity columns when missing (older schemas)
+    $columnsStmt = $db->prepare('SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = "events"');
+    $columnsStmt->execute();
+    $columns = $columnsStmt->fetchAll(PDO::FETCH_COLUMN);
+    $hasCapacity = in_array('capacity', $columns, true);
+    $hasAvailable = in_array('available_spots', $columns, true);
+
+    if (!$hasCapacity) {
+        $db->exec('ALTER TABLE `events` ADD COLUMN `capacity` INT DEFAULT 0');
+    }
+
+    if (!$hasAvailable) {
+        $db->exec('ALTER TABLE `events` ADD COLUMN `available_spots` INT DEFAULT 0');
+    }
+
+    if (!$hasAvailable) {
+        // Initialize available_spots for existing rows where capacity is set
+        $db->exec('UPDATE `events` SET `available_spots` = COALESCE(`capacity`, 0) WHERE `available_spots` IS NULL');
+    }
     $headers = function_exists('getallheaders') ? getallheaders() : [];
     $firebaseUid = $headers['X-Firebase-UID'] ?? ($headers['x-firebase-uid'] ?? null);
 
