@@ -41,50 +41,6 @@ $age = $hasAge ? $data['age'] : null;
 $phone = $hasPhone ? trim((string) $data['phone']) : null;
 $location = $hasLocation ? trim((string) $data['location']) : null;
 
-$errors = [];
-
-if ($hasAge) {
-    if (!is_numeric($age)) {
-        $errors[] = 'Age must be a number';
-    } else {
-        $age = (int) $age;
-        if ($age < 13 || $age > 120) {
-            $errors[] = 'Age must be between 13 and 120';
-        }
-    }
-}
-
-if ($hasPhone) {
-    $numericLength = strlen(preg_replace('/\D+/', '', $phone));
-    if ($phone === '') {
-        $errors[] = 'Phone is required';
-    } elseif (mb_strlen($phone) > 30) {
-        $errors[] = 'Phone is too long (max 30 characters)';
-    } elseif ($numericLength < 7 || $numericLength > 15 || !preg_match('/^\+[0-9\s().\-]+$/', $phone)) {
-        $errors[] = 'Phone must include country code (7-15 digits, e.g., +1 555 123 4567)';
-    }
-} else {
-    $errors[] = 'Phone is required';
-}
-
-if ($hasLocation) {
-    if ($location === '') {
-        $errors[] = 'Location is required';
-    } elseif (mb_strlen($location) > 191) {
-        $errors[] = 'Location is too long (max 191 characters)';
-    } elseif (!preg_match('/^(?=.*[A-Za-z]).{2,191}$/', $location)) {
-        $errors[] = 'Location must include letters (e.g., City, Country)';
-    }
-} else {
-    $errors[] = 'Location is required';
-}
-
-if (!empty($errors)) {
-    http_response_code(422);
-    echo json_encode(['error' => implode('. ', $errors)]);
-    exit;
-}
-
 try {
     $db = require __DIR__ . '/db.php';
 
@@ -94,6 +50,50 @@ try {
     $stmt = $db->prepare('SELECT id, name, email, age, phone, location FROM users WHERE firebase_uid = :uid');
     $stmt->execute([':uid' => $uid]);
     $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $errors = [];
+
+    if ($hasAge) {
+        if (!is_numeric($age)) {
+            $errors[] = 'Age must be a number';
+        } else {
+            $age = (int) $age;
+            if ($age < 13 || $age > 120) {
+                $errors[] = 'Age must be between 13 and 120';
+            }
+        }
+    }
+
+    if ($hasPhone) {
+        $numericLength = strlen(preg_replace('/\D+/', '', $phone));
+        if ($phone === '') {
+            $errors[] = 'Phone is required';
+        } elseif (mb_strlen($phone) > 30) {
+            $errors[] = 'Phone is too long (max 30 characters)';
+        } elseif ($numericLength < 7 || $numericLength > 15 || !preg_match('/^\+[0-9\s().\-]+$/', $phone)) {
+            $errors[] = 'Phone must include country code (7-15 digits, e.g., +1 555 123 4567)';
+        }
+    } elseif (!$existing) {
+        $errors[] = 'Phone is required';
+    }
+
+    if ($hasLocation) {
+        if ($location === '') {
+            $errors[] = 'Location is required';
+        } elseif (mb_strlen($location) > 191) {
+            $errors[] = 'Location is too long (max 191 characters)';
+        } elseif (!preg_match('/^(?=.*[A-Za-z]).{2,191}$/', $location)) {
+            $errors[] = 'Location must include letters (e.g., City, Country)';
+        }
+    } elseif (!$existing) {
+        $errors[] = 'Location is required';
+    }
+
+    if (!empty($errors)) {
+        http_response_code(422);
+        echo json_encode(['error' => implode('. ', $errors)]);
+        exit;
+    }
 
     if ($existing) {
         $nameToSave = $hasName ? $name : $existing['name'];

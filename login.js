@@ -121,6 +121,8 @@ signupForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const nameEl = document.getElementById("fullname");
   const ageEl = document.getElementById("age");
+  const phoneEl = document.getElementById("signup-phone");
+  const locationEl = document.getElementById("signup-location");
   const emailEl = document.getElementById("signup-email");
   const passwordEl = document.getElementById("signup-password");
   const confirmEl = document.getElementById("confirm-password");
@@ -131,6 +133,8 @@ signupForm.addEventListener("submit", async (e) => {
 
   const name = nameEl.value.trim();
   const age = ageEl.value.trim();
+  const phone = phoneEl.value.trim();
+  const location = locationEl.value.trim();
   const email = emailEl.value.trim();
   const password = passwordEl.value;
   const confirm = confirmEl.value;
@@ -145,8 +149,24 @@ signupForm.addEventListener("submit", async (e) => {
   else if (password.length < 6)
     clientErrors.push("Password must be at least 6 characters");
   if (password !== confirm) clientErrors.push("Passwords do not match");
-  if (!age || isNaN(age) || parseInt(age) < 1)
-    clientErrors.push("Valid age is required");
+  if (!age || isNaN(age) || parseInt(age, 10) < 13)
+    clientErrors.push("Age must be at least 13");
+
+  // Phone must start with + and include 7-15 digits
+  const phoneDigits = phone.replace(/\D+/g, "");
+  if (!phone) {
+    clientErrors.push("Phone is required");
+  } else if (!phone.startsWith("+")) {
+    clientErrors.push("Phone must start with + and country code");
+  } else if (phoneDigits.length < 7 || phoneDigits.length > 15) {
+    clientErrors.push("Phone must include 7-15 digits");
+  }
+
+  if (!location) {
+    clientErrors.push("Location is required");
+  } else if (!/[A-Za-z]/.test(location)) {
+    clientErrors.push("Location must include letters (e.g., City, Country)");
+  }
 
   if (clientErrors.length) {
     errorEl.textContent = clientErrors.join(". ");
@@ -177,7 +197,9 @@ signupForm.addEventListener("submit", async (e) => {
         uid: user.uid,
         email: user.email,
         name: name,
-        age: parseInt(age),
+        age: parseInt(age, 10),
+        phone: phone,
+        location: location,
       }),
     });
 
