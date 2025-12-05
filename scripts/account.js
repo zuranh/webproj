@@ -10,31 +10,11 @@ const changePasswordBtn = document.getElementById("change-password-btn");
 const deleteAccountBtn = document.getElementById("delete-account-btn");
 let currentUser = null;
 
-function isFullName(value) {
-  if (!value) return false;
-  const trimmed = value.trim();
-  const parts = trimmed.split(/\s+/).filter(Boolean);
-  if (parts.length < 2) return false;
-
-  const partOk = parts.every((part) => /^[A-Za-z][A-Za-z'\-]{1,}[A-Za-z]$/.test(part));
-  if (!partOk) return false;
-
-  return trimmed.replace(/\s+/g, " ").length >= 5;
-}
-
 // Ensure a database record exists for the signed-in Firebase user.
 async function syncUserRecord(user) {
   const idToken = await user.getIdToken();
 
-  let nameToSend = user.displayName?.trim() || "";
-
-  if (!isFullName(nameToSend)) {
-    throw new Error(
-      "A valid full name is required. Please sign out and sign up again with your full name."
-    );
-  }
-
-  nameToSend = nameToSend.replace(/\s+/g, " ");
+  const nameToSend = (user.displayName || "").trim() || null;
 
   const res = await fetch("api/sync-user.php", {
     method: "POST",

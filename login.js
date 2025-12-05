@@ -13,20 +13,6 @@ const signupForm = document.getElementById("signup-form");
 const switchToSignup = document.getElementById("switch-to-signup");
 const switchToLogin = document.getElementById("switch-to-login");
 
-function isFullName(value) {
-  if (!value) return false;
-  const trimmed = value.trim();
-  const parts = trimmed.split(/\s+/).filter(Boolean);
-  if (parts.length < 2) return false;
-
-  // Require each part to be at least two alphabetic characters (allowing hyphen/apostrophe)
-  const partOk = parts.every((part) => /^[A-Za-z][A-Za-z'\-]{1,}[A-Za-z]$/.test(part));
-  if (!partOk) return false;
-
-  // Prevent obviously short "names" like "A B"
-  return trimmed.replace(/\s+/g, " ").length >= 5;
-}
-
 function isStrongPassword(value) {
   // At least one uppercase, one lowercase, one digit, one symbol, and 8+ characters
   return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(value);
@@ -159,11 +145,6 @@ signupForm.addEventListener("submit", async (e) => {
   // Client-side validation
   const clientErrors = [];
   nameEl.setCustomValidity("");
-  if (!name) clientErrors.push("Full name is required");
-  else if (!isFullName(name)) {
-    clientErrors.push("Enter your first and last name");
-    nameEl.setCustomValidity("Please enter your first and last name.");
-  }
   if (!email) clientErrors.push("Email is required");
   else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
     clientErrors.push("Enter a valid email");
@@ -179,9 +160,6 @@ signupForm.addEventListener("submit", async (e) => {
   if (clientErrors.length) {
     errorEl.textContent = clientErrors.join(". ");
     errorEl.style.display = "block";
-    if (!isFullName(name)) {
-      nameEl.reportValidity();
-    }
     return;
   }
 
@@ -196,13 +174,8 @@ signupForm.addEventListener("submit", async (e) => {
     );
     const user = userCredential.user;
 
-    // Persist the provided full name into the Firebase profile for downstream flows
-    await updateProfile(user, { displayName: normalizedName });
-
-    const profileName = user.displayName?.trim() || normalizedName;
-    if (!isFullName(profileName)) {
-      await signOut(auth);
-      throw new Error("Full name is required to complete sign up.");
+    if (normalizedName) {
+      await updateProfile(user, { displayName: normalizedName });
     }
 
     // Get Firebase ID token
@@ -218,7 +191,7 @@ signupForm.addEventListener("submit", async (e) => {
       body: JSON.stringify({
         uid: user.uid,
         email: user.email,
-        name: normalizedName,
+        name: normalizedName || null,
         age: parseInt(age),
       }),
     });

@@ -72,19 +72,9 @@ try {
     $errors = [];
 
     if ($name === '') {
-        $errors[] = 'Name is required';
+        $name = null;
     } elseif (mb_strlen($name) > 191) {
         $errors[] = 'Name is too long (max 191 characters)';
-    } else {
-        $parts = preg_split('/\s+/', $name, -1, PREG_SPLIT_NO_EMPTY);
-        $validParts = array_filter($parts, fn($part) => preg_match("/^[A-Za-z][A-Za-z'\\-]{1,}[A-Za-z]$/", $part));
-        if (count($parts) < 2) {
-            $errors[] = 'Please enter your full name';
-        } elseif (count($validParts) !== count($parts)) {
-            $errors[] = 'Name may only include letters plus hyphen/apostrophe';
-        } elseif (mb_strlen(preg_replace('/\s+/', ' ', $name)) < 5) {
-            $errors[] = 'Full name is too short';
-        }
     }
 
     if ($age !== null && $age !== '') {
