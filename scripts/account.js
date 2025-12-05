@@ -1,6 +1,7 @@
 import { auth } from "../firebase-config.js";
 import {
   onAuthStateChanged,
+  deleteUser,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
@@ -115,6 +116,19 @@ if (deleteAccountBtn) {
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.error || "Failed to delete account");
+      }
+
+      try {
+        await deleteUser(currentUser);
+      } catch (firebaseErr) {
+        // If the session is too old, require a fresh login before deletion
+        if (firebaseErr?.code === "auth/requires-recent-login") {
+          alert(
+            "Please sign in again to confirm account deletion, then try deleting once more."
+          );
+        } else {
+          console.warn("Firebase account deletion skipped:", firebaseErr);
+        }
       }
 
       await signOut(auth);
