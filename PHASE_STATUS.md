@@ -11,13 +11,13 @@ Evidence:
 - Account page loads profile fields (name, email, age, location, phone, bio, joined date) and links to edit/change password/delete flows.【F:scripts/account.js†L13-L140】【F:account.html†L45-L113】
 
 ## Phase 4: Event Registration System
-Status: **In progress (core flows added)**
+Status: **Complete (add, view, and cancel working)**
 
 Evidence:
 - Registrations API enforces authentication, capacity checks, and duplicate prevention while creating or canceling sign-ups.【F:api/registrations.php†L1-L211】
-- Schema now includes a `registrations` table with uniqueness and foreign keys for events/users.【F:api/schema.sql†L68-L83】
-- Event page Register button calls the new API, reflects sold-out/registered states, and surfaces status messaging.【F:scripts/event.js†L18-L169】【F:event.html†L93-L103】
-- Dedicated “My Registrations” page lists a user’s sign-ups with cancel actions and navigation links.【F:registrations.html†L1-L49】【F:scripts/registrations.js†L1-L132】
+- Schema includes a `registrations` table with uniqueness and foreign keys for events/users, created automatically if missing.【F:api/schema.sql†L68-L83】
+- Event page Register button calls the API, reflects sold-out/registered states, and surfaces status messaging (including cancel flow).【F:scripts/event.js†L18-L186】【F:event.html†L93-L105】
+- “My Registrations” page lists sign-ups with cancel actions and navigation links; users can view and cancel registrations successfully.【F:registrations.html†L1-L49】【F:scripts/registrations.js†L1-L132】
 
 ## Recommended Next Steps
 Proceed to **Phase 5 (Admin & Owner Features)**:
