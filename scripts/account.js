@@ -6,6 +6,8 @@ import {
 
 const editProfileBtn = document.getElementById("edit-profile-btn");
 const changePasswordBtn = document.getElementById("change-password-btn");
+const deleteAccountBtn = document.getElementById("delete-account-btn");
+let currentUser = null;
 
 // Load user profile
 async function loadProfile() {
@@ -15,6 +17,8 @@ async function loadProfile() {
       window.location.href = "login.html";
       return;
     }
+
+    currentUser = user;
 
     try {
       // Get Firebase ID token
@@ -82,5 +86,43 @@ if (editProfileBtn) {
 if (changePasswordBtn) {
   changePasswordBtn.addEventListener("click", () => {
     window.location.href = "change-password.html";
+  });
+}
+
+// Delete account handler
+if (deleteAccountBtn) {
+  deleteAccountBtn.addEventListener("click", async () => {
+    if (!currentUser) {
+      window.location.href = "login.html";
+      return;
+    }
+
+    const confirmed = confirm(
+      "Are you sure you want to permanently delete your account? This cannot be undone."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const idToken = await currentUser.getIdToken();
+      const res = await fetch("api/delete-account.php", {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to delete account");
+      }
+
+      await signOut(auth);
+      alert("Your account has been deleted.");
+      window.location.href = "login.html";
+    } catch (err) {
+      console.error("Delete account error:", err);
+      alert(err.message || "Unable to delete account.");
+    }
   });
 }
