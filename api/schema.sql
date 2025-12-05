@@ -78,6 +78,21 @@ CREATE TABLE IF NOT EXISTS `user_favorites` (
   CONSTRAINT `fk_fav_event` FOREIGN KEY (`event_id`) REFERENCES `events`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- REGISTRATIONS
+CREATE TABLE IF NOT EXISTS `registrations` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `user_id` INT NOT NULL,
+  `event_id` INT NOT NULL,
+  `status` ENUM('registered','cancelled') DEFAULT 'registered',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY `unique_registration` (`user_id`, `event_id`),
+  INDEX `idx_reg_user` (`user_id`),
+  INDEX `idx_reg_event` (`event_id`),
+  CONSTRAINT `fk_reg_user` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_reg_event` FOREIGN KEY (`event_id`) REFERENCES `events`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ADMIN_PERMISSIONS
 CREATE TABLE IF NOT EXISTS `admin_permissions` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
