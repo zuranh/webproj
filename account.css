@@ -144,26 +144,26 @@ body {
 
 
 /* ========================= */
-/*   REGISTERED EVENTS LIST  */
+/*   FAVORITED EVENTS LIST   */
 /* ========================= */
 
-#registered-events {
+#favorite-events {
     background: #fff;
     padding: 25px 30px;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
 
-#registered-events h3 {
+#favorite-events h3 {
     margin-bottom: 20px;
 }
 
-#registered-events-container {
+#favorite-events-container {
     display: grid;
     gap: 20px;
 }
 
-.registered-event-card {
+.favorite-event-card {
     background: #fafafa;
     padding: 20px;
     border-radius: 10px;
@@ -171,12 +171,12 @@ body {
     transition: 0.2s;
 }
 
-.registered-event-card:hover {
+.favorite-event-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-.registered-event-card h4 {
+.favorite-event-card h4 {
     font-size: 18px;
     margin-bottom: 6px;
 }
