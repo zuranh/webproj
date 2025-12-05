@@ -79,17 +79,11 @@ if ($method === 'POST') {
         }
     }
 
-    $status = $input['status'] ?? 'published';
-    if (!in_array($status, ['draft', 'published', 'archived'], true)) {
-        respond(422, ['success' => false, 'error' => 'Invalid status']);
-    }
+    $status = 'published';
 
     $genres = isset($input['genres']) && is_array($input['genres']) ? $input['genres'] : [];
-    if (count($genres) === 0) {
-        respond(422, ['success' => false, 'error' => 'At least one genre is required']);
-    }
 
-    $primaryGenre = $genres[0];
+    $primaryGenre = $genres[0] ?? null;
     $capacity = sanitizeInt($input['capacity'] ?? 0);
     $available = $capacity !== null ? $capacity : 0;
 
@@ -120,9 +114,11 @@ if ($method === 'POST') {
 
     $eventId = $db->lastInsertId();
 
-    $genreStmt = $db->prepare('INSERT INTO event_genres (event_id, genre_id) VALUES (:event_id, :genre_id)');
-    foreach ($genres as $genreId) {
-        $genreStmt->execute([':event_id' => $eventId, ':genre_id' => $genreId]);
+    if (!empty($genres)) {
+        $genreStmt = $db->prepare('INSERT INTO event_genres (event_id, genre_id) VALUES (:event_id, :genre_id)');
+        foreach ($genres as $genreId) {
+            $genreStmt->execute([':event_id' => $eventId, ':genre_id' => $genreId]);
+        }
     }
 
     if (method_exists($auth, 'logAction')) {

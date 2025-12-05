@@ -5,18 +5,6 @@ const submitBtn = document.getElementById("submit-btn");
 const btnText = document.getElementById("btn-text");
 const btnLoader = document.getElementById("btn-loader");
 
-function setStatusSelectionHandlers() {
-  document.querySelectorAll(".status-option").forEach((option) => {
-    option.addEventListener("click", () => {
-      document
-        .querySelectorAll(".status-option")
-        .forEach((o) => o.classList.remove("selected"));
-      option.classList.add("selected");
-      option.querySelector("input[type='radio']").checked = true;
-    });
-  });
-}
-
 function showAlert(message, type = "error") {
   if (!message) {
     alertContainer.innerHTML = "";
@@ -108,7 +96,7 @@ function collectFormData() {
     age_restriction: document.getElementById("age_restriction").value || null,
     price: document.getElementById("price").value || 0,
     image_url: document.getElementById("image_url").value.trim() || null,
-    status: document.querySelector('input[name="status"]:checked').value,
+    status: "published",
     genres,
   };
 }
@@ -118,7 +106,6 @@ function validateForm(data) {
   if (!data.description) return "Description is required.";
   if (!data.date || !data.time) return "Date and time are required.";
   if (!data.location) return "Location is required.";
-  if (!data.genres.length) return "Please select at least one genre.";
   return null;
 }
 
@@ -151,9 +138,6 @@ async function handleSubmit(event) {
     document
       .querySelectorAll(".genre-option")
       .forEach((el) => el.classList.remove("selected"));
-    document
-      .querySelectorAll(".status-option")
-      .forEach((el, idx) => el.classList.toggle("selected", idx === 0));
   } catch (err) {
     console.error("Error creating event", err);
     showAlert(err.message, "error");
@@ -166,7 +150,6 @@ async function init() {
   try {
     await adminAuth.init();
     adminAuth.updateUIForRole();
-    setStatusSelectionHandlers();
     await loadGenres();
   } catch (err) {
     console.error("Admin auth failed", err);
