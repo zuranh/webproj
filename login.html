@@ -64,40 +64,12 @@
       <form id="signup-form" class="auth-form">
         <div class="form-group">
           <label for="fullname">Full Name</label>
-          <input
-            type="text"
-            id="fullname"
-            placeholder="First and last name"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="signup-phone">Phone Number</label>
-          <input
-            type="tel"
-            id="signup-phone"
-            placeholder="+1 555 123 4567"
-            required
-            pattern="^\+[0-9][0-9\s().-]{6,}$"
-            title="Include country code (e.g., +1 555 123 4567)"
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="signup-location">Location</label>
-          <input
-            type="text"
-            id="signup-location"
-            placeholder="City, Country"
-            required
-            pattern="^(?=.*[A-Za-z]).{2,191}$"
-            title="Add a city and country (letters required)"
-          />
+          <input type="text" id="fullname" placeholder="John Doe" required />
         </div>
 
         <div class="form-group">
           <label for="age">Age</label>
-          <input type="number" id="age" min="13" placeholder="18" required />
+          <input type="number" id="age" min="1" placeholder="18" required />
         </div>
 
         <div class="form-group">
@@ -115,11 +87,8 @@
           <input
             type="password"
             id="signup-password"
-            placeholder="Min 8 chars, upper/lower/number/symbol"
+            placeholder="••••••••"
             required
-            minlength="8"
-            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$"
-            title="Must include upper & lower case letters, a number, and a symbol"
           />
         </div>
 
@@ -130,7 +99,6 @@
             id="confirm-password"
             placeholder="••••••••"
             required
-            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$"
           />
         </div>
 

@@ -10,7 +10,231 @@
     <meta name="author" content="Event Finder Team" />
     <link rel="stylesheet" href="event.css" />
     <title>Event Details | Event Finder</title>
-    
+    <style>
+      #event-hero {
+        position: relative;
+        width: 100%;
+        height: 400px;
+        overflow: hidden;
+      }
+
+      #event-main-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      #event-title-box {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+        color: white;
+        padding: 40px 20px 20px;
+      }
+
+      #event-title {
+        font-size: 2.5rem;
+        margin: 0 0 10px 0;
+      }
+
+      #event-subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+      }
+
+      .event-genres {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 15px 0;
+      }
+
+      .genre-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 8px 16px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1rem;
+      }
+
+      .event-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+        max-width: 1400px;
+        margin: 40px auto;
+        padding: 0 20px;
+      }
+
+      .event-info-column {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .event-info-column h3 {
+        color: #667eea;
+        margin-bottom: 20px;
+        font-size: 1.5rem;
+      }
+
+      .event-info-column section {
+        margin-bottom: 40px;
+      }
+
+      #info-section ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      #info-section li {
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      #info-section li:last-child {
+        border-bottom: none;
+      }
+
+      .ticket-box {
+        position: sticky;
+        top: 20px;
+        height: fit-content;
+      }
+
+      .ticket-card {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border: 2px solid #667eea;
+      }
+
+      .ticket-card h3 {
+        color: #667eea;
+        margin-bottom: 20px;
+      }
+
+      .ticket-card p {
+        margin: 15px 0;
+        font-size: 1.1rem;
+      }
+
+      .price-display {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+        margin: 20px 0;
+      }
+
+      #register-btn,
+      #favorite-btn {
+        width: 100%;
+        padding: 15px;
+        margin: 10px 0;
+        border: none;
+        border-radius: 10px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      #register-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      #register-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      #favorite-btn {
+        background: white;
+        color: #ff6b6b;
+        border: 2px solid #ff6b6b;
+      }
+
+      #favorite-btn:hover {
+        background: #ff6b6b;
+        color: white;
+      }
+
+      #favorite-btn.favorited {
+        background: #ff6b6b;
+        color: white;
+      }
+
+      #map-container {
+        width: 100%;
+        height: 300px;
+        background: #f0f0f0;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #999;
+        margin-top: 20px;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 100px 20px;
+        color: #999;
+        font-size: 1.5rem;
+      }
+
+      .error-state {
+        text-align: center;
+        padding: 100px 20px;
+      }
+
+      .error-state h2 {
+        color: #ff6b6b;
+        margin-bottom: 15px;
+      }
+
+      .back-btn {
+        display: inline-block;
+        padding: 12px 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 25px;
+        margin-top: 20px;
+        transition: all 0.3s;
+      }
+
+      .back-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+
+      .creator-info {
+        background: #f8f9ff;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
+      }
+
+      @media (max-width: 768px) {
+        .event-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .ticket-box {
+          position: static;
+        }
+      }
+    </style>
   </head>
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
@@ -115,6 +339,282 @@
       <p class="disclaimer">Discover amazing events near you.</p>
     </footer>
 
-    <script type="module" src="scripts/event.js"></script>
+    <!-- Firebase: expose auth and onAuthStateChanged to the page -->
+    <script type="module">
+      // Import the firebase auth helper (no stray spaces in the URL)
+      // Keep the same auth instance as your firebase-config.js exports.
+      import { auth } from "/web-proj/firebase-config.js";
+      import { onAuthStateChanged as fbOnAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      // Expose to global scope so the inline script below can use them
+      window.firebaseAuth = auth;
+      window.onAuthStateChanged = fbOnAuthStateChanged;
+    </script>
+
+    <script>
+      // Safety: read event id from URL and bail early if missing
+      const urlParams = new URLSearchParams(window.location.search);
+      const eventId = urlParams.get("id");
+
+      if (!eventId) {
+        // showError is defined below; call it and stop execution
+        document.addEventListener("DOMContentLoaded", () => {
+          showError("No event ID provided");
+        });
+        // stop further script execution
+        throw new Error("Missing event id");
+      }
+
+      let currentUser = null;
+      let currentEvent = null;
+      let isFavorited = false;
+
+      // Initialize after DOM loads
+      window.addEventListener("DOMContentLoaded", async () => {
+        // Ensure firebase objects are available
+        if (!window.firebaseAuth || !window.onAuthStateChanged) {
+          console.warn(
+            "Firebase auth not available yet. Make sure firebase-config.js initializes Firebase."
+          );
+        } else {
+          // Use the modular onAuthStateChanged (exposed to window by the module above)
+          window.onAuthStateChanged(
+            window.firebaseAuth,
+            async (firebaseUser) => {
+              if (firebaseUser) {
+                await loadCurrentUser(firebaseUser);
+                updateUIForLoggedIn();
+                await checkIfFavorited();
+              } else {
+                // not signed in - still load event
+              }
+            }
+          );
+        }
+
+        // Load event details
+        await loadEvent();
+      });
+
+      // Load current user from server using Firebase UID header
+      async function loadCurrentUser(firebaseUser) {
+        try {
+          const response = await fetch("/web-proj/api/me.php", {
+            headers: { "X-Firebase-UID": firebaseUser.uid },
+          });
+          const data = await response.json();
+          if (data.user) {
+            currentUser = data.user;
+          }
+        } catch (error) {
+          console.error("Failed to load user:", error);
+        }
+      }
+
+      function updateUIForLoggedIn() {
+        if (currentUser && ["admin", "owner"].includes(currentUser.role)) {
+          document.getElementById("admin-link").style.display = "block";
+        }
+      }
+
+      async function loadEvent() {
+        try {
+          const response = await fetch(
+            `/web-proj/api/events.php?id=${encodeURIComponent(eventId)}`
+          );
+          const data = await response.json();
+
+          if (data.success && data.event) {
+            currentEvent = data.event;
+            renderEvent();
+          } else {
+            showError("Event not found");
+          }
+        } catch (error) {
+          console.error("Failed to load event:", error);
+          showError("Failed to load event details");
+        }
+      }
+
+      function renderEvent() {
+        const event = currentEvent;
+
+        // Hide loading, show content
+        document.getElementById("loading-container").style.display = "none";
+        document.getElementById("event-content").style.display = "block";
+
+        // Hero section
+        const imageUrl =
+          event.image_url &&
+          typeof event.image_url === "string" &&
+          event.image_url.trim()
+            ? event.image_url
+            : `https://via.placeholder.com/1200x400?text=Event:${encodeURIComponent(
+                event.id || eventId
+              )}`;
+        document.getElementById("event-main-image").src = imageUrl;
+        document.getElementById("event-title").textContent =
+          event.title || "Untitled Event";
+        document.getElementById("event-subtitle").textContent = `${
+          event.location || "Location TBA"
+        } • ${event.date || "Date TBA"}${event.time ? " • " + event.time : ""}`;
+
+        // Genres
+        const genresContainer = document.getElementById("event-genres");
+        genresContainer.innerHTML = "";
+        if (Array.isArray(event.genres) && event.genres.length) {
+          event.genres.forEach((gName) => {
+            const badge = document.createElement("span");
+            badge.className = "genre-badge";
+            badge.textContent = gName;
+            genresContainer.appendChild(badge);
+          });
+        } else if (event.genre_name) {
+          const badge = document.createElement("span");
+          badge.className = "genre-badge";
+          badge.textContent = event.genre_name;
+          genresContainer.appendChild(badge);
+        }
+
+        // Description
+        document.getElementById("event-description").textContent =
+          event.description || "No description provided.";
+
+        // Event info
+        document.getElementById("info-date").textContent = event.date || "TBA";
+        document.getElementById("info-time").textContent = event.time || "TBA";
+        document.getElementById("info-location").textContent =
+          event.location || "TBA";
+        const price =
+          event.price && parseFloat(event.price) > 0
+            ? `$${parseFloat(event.price).toFixed(2)}`
+            : "FREE";
+        document.getElementById("info-price").textContent = price;
+        document.getElementById("info-age").textContent = event.age_restriction
+          ? `${event.age_restriction}+`
+          : "All ages";
+        document.getElementById("info-status").textContent =
+          event.status || "Published";
+
+        // Creator info
+        if (event.creator_name) {
+          const createdAt = event.created_at
+            ? new Date(event.created_at).toLocaleDateString()
+            : "-";
+          document.getElementById("creator-info").style.display = "block";
+          document.getElementById("creator-name").textContent =
+            event.creator_name;
+          document.getElementById("created-date").textContent = createdAt;
+        }
+
+        // Ticket card
+        document.getElementById("ticket-price").textContent = price;
+        document.getElementById("ticket-info").textContent =
+          event.price && parseFloat(event.price) > 0
+            ? "Purchase your tickets today!"
+            : "Free entry - Register to attend!";
+
+        // Setup buttons (remove previous handlers if any to avoid duplicates)
+        const registerBtn = document.getElementById("register-btn");
+        registerBtn.replaceWith(registerBtn.cloneNode(true));
+        document
+          .getElementById("register-btn")
+          .addEventListener("click", () => {
+            alert("Registration functionality coming soon!");
+          });
+
+        const favoriteBtn = document.getElementById("favorite-btn");
+        favoriteBtn.replaceWith(favoriteBtn.cloneNode(true));
+        document
+          .getElementById("favorite-btn")
+          .addEventListener("click", toggleFavorite);
+
+        // Update page title
+        document.title = `${event.title || "Event"} | Event Finder`;
+      }
+
+      async function checkIfFavorited() {
+        if (!currentUser || !eventId) return;
+
+        try {
+          const firebaseUser = window.firebaseAuth.currentUser;
+          const response = await fetch("/web-proj/api/favorites.php", {
+            headers: { "X-Firebase-UID": firebaseUser.uid },
+          });
+          const data = await response.json();
+
+          if (data.success) {
+            const favoriteIds = data.favorites.map((f) => f.id);
+            isFavorited = favoriteIds.includes(parseInt(eventId));
+            updateFavoriteButton();
+          }
+        } catch (error) {
+          console.error("Failed to check favorites:", error);
+        }
+      }
+
+      function updateFavoriteButton() {
+        const btn = document.getElementById("favorite-btn");
+        if (!btn) return;
+        if (isFavorited) {
+          btn.textContent = "❤️ Favorited";
+          btn.classList.add("favorited");
+        } else {
+          btn.textContent = "♡ Add to Favorites";
+          btn.classList.remove("favorited");
+        }
+      }
+
+      async function toggleFavorite() {
+        if (!currentUser) {
+          alert("Please log in to add favorites");
+          window.location.href = "/web-proj/login.html";
+          return;
+        }
+
+        const firebaseUser = window.firebaseAuth.currentUser;
+
+        try {
+          const response = await fetch(
+            "/web-proj/api/favorites.php" +
+              (isFavorited ? `?event_id=${encodeURIComponent(eventId)}` : ""),
+            {
+              method: isFavorited ? "DELETE" : "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-Firebase-UID": firebaseUser.uid,
+              },
+              body: isFavorited
+                ? null
+                : JSON.stringify({ event_id: parseInt(eventId) }),
+            }
+          );
+
+          const data = await response.json();
+
+          if (data.success) {
+            isFavorited = !isFavorited;
+            updateFavoriteButton();
+          } else {
+            alert(
+              "Failed to update favorite: " + (data.error || "Unknown error")
+            );
+          }
+        } catch (error) {
+          console.error("Failed to toggle favorite:", error);
+          alert("Failed to update favorite");
+        }
+      }
+
+      function showError(message) {
+        document.getElementById("loading-container").innerHTML = `
+                <div class="error-state">
+                    <h2>⚠️ Error</h2>
+                    <p>${message}</p>
+                    <a href="/web-proj/index.html" class="back-btn">Go Back Home</a>
+                </div>
+            `;
+      }
+    </script>
   </body>
 </html>

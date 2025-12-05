@@ -2,8 +2,6 @@ import { auth } from "./firebase-config.js";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  updateProfile,
-  signOut,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const loginTab = document.getElementById("login-tab");
@@ -12,14 +10,6 @@ const loginForm = document.getElementById("login-form");
 const signupForm = document.getElementById("signup-form");
 const switchToSignup = document.getElementById("switch-to-signup");
 const switchToLogin = document.getElementById("switch-to-login");
-
-function isStrongPassword(value) {
-  // At least one uppercase, one lowercase, one digit, one symbol, and 8+ characters
-  return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(value);
-}
-
-const phonePattern = /^\+[0-9\s().-]{7,}$/;
-const locationPattern = /^(?=.{2,191}$)(?=.*[A-Za-z])[A-Za-z\s',.-]+$/;
 
 function showLogin() {
   loginForm.classList.add("active");
@@ -132,8 +122,6 @@ signupForm.addEventListener("submit", async (e) => {
   const nameEl = document.getElementById("fullname");
   const ageEl = document.getElementById("age");
   const emailEl = document.getElementById("signup-email");
-  const phoneEl = document.getElementById("signup-phone");
-  const locationEl = document.getElementById("signup-location");
   const passwordEl = document.getElementById("signup-password");
   const confirmEl = document.getElementById("confirm-password");
   const errorEl = document.getElementById("signup-error");
@@ -144,60 +132,29 @@ signupForm.addEventListener("submit", async (e) => {
   const name = nameEl.value.trim();
   const age = ageEl.value.trim();
   const email = emailEl.value.trim();
-  const rawPhone = phoneEl.value;
-  const phone = rawPhone.replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
-  phoneEl.value = phone;
-  const location = locationEl.value.trim();
   const password = passwordEl.value;
   const confirm = confirmEl.value;
 
   // Client-side validation
   const clientErrors = [];
-  nameEl.setCustomValidity("");
-  phoneEl.setCustomValidity("");
-  locationEl.setCustomValidity("");
+  if (!name) clientErrors.push("Name is required");
   if (!email) clientErrors.push("Email is required");
   else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
     clientErrors.push("Enter a valid email");
   if (!password) clientErrors.push("Password is required");
-  else if (!isStrongPassword(password))
-    clientErrors.push(
-      "Password must be 8+ chars with upper, lower, number, and symbol"
-    );
+  else if (password.length < 6)
+    clientErrors.push("Password must be at least 6 characters");
   if (password !== confirm) clientErrors.push("Passwords do not match");
-  if (!age || isNaN(age) || parseInt(age) < 13)
-    clientErrors.push("Age must be 13 or older");
-  const phoneDigits = phone.replace(/\D/g, "");
-  if (!phone)
-    clientErrors.push("Phone number is required with country code (e.g., +1 ...)");
-  else if (!/^\+/.test(phone)) {
-    clientErrors.push("Phone number must start with + and country code");
-    phoneEl.setCustomValidity("Phone number must start with + and country code");
-  } else if (phoneDigits.length < 7 || phoneDigits.length > 15 || !phonePattern.test(phone)) {
-    clientErrors.push(
-      "Enter a valid phone number with country code (7-15 digits, e.g., +1 555 123 4567)"
-    );
-    phoneEl.setCustomValidity(
-      "Enter a valid phone number with country code (7-15 digits, e.g., +1 555 123 4567)"
-    );
-  }
-  if (!location)
-    clientErrors.push("Location is required (e.g., City, Country)");
-  else if (!locationPattern.test(location)) {
-    clientErrors.push("Location must include letters (e.g., City, Country)");
-    locationEl.setCustomValidity("Location must include letters (e.g., City, Country)");
-  }
+  if (!age || isNaN(age) || parseInt(age) < 1)
+    clientErrors.push("Valid age is required");
 
   if (clientErrors.length) {
     errorEl.textContent = clientErrors.join(". ");
     errorEl.style.display = "block";
-    signupForm.reportValidity();
     return;
   }
 
   try {
-    const normalizedName = name.replace(/\s+/g, " ");
-
     // Create user in Firebase
     const userCredential = await createUserWithEmailAndPassword(
       auth,
@@ -206,19 +163,11 @@ signupForm.addEventListener("submit", async (e) => {
     );
     const user = userCredential.user;
 
-    if (normalizedName) {
-      await updateProfile(user, { displayName: normalizedName });
-    }
-
-    // Cache phone and location locally for future re-syncs after account deletion
-    localStorage.setItem("signupPhone", phone);
-    localStorage.setItem("signupLocation", location);
-
     // Get Firebase ID token
     const idToken = await user.getIdToken();
 
     // Send additional user data to backend
-    const syncRes = await fetch("api/sync-user.php", {
+    await fetch("api/sync-user.php", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -227,19 +176,10 @@ signupForm.addEventListener("submit", async (e) => {
       body: JSON.stringify({
         uid: user.uid,
         email: user.email,
-        name: normalizedName || null,
+        name: name,
         age: parseInt(age),
-        phone,
-        location,
       }),
     });
-
-    if (!syncRes.ok) {
-      const data = await syncRes.json().catch(() => ({}));
-      const message = data.error || "Could not finish account setup";
-      await signOut(auth);
-      throw new Error(message);
-    }
 
     // Redirect to account page
     window.location.href = "account.html";

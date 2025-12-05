@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="account.css" />
     <meta
       name="description"
-      content="Your Event Finder profile — view and manage your account and favorited events."
+      content="Your Event Finder profile — view and manage your account and registered events."
     />
     <meta name="author" content="Event Finder Team" />
     <title>Your Profile | Event Finder</title>
@@ -53,12 +53,6 @@
             <span id="user-email">john@example.com</span>
           </li>
           <li><strong>Age:</strong> <span id="user-age">22</span></li>
-          <li><strong>Location:</strong> <span id="user-location">N/A</span></li>
-          <li><strong>Phone:</strong> <span id="user-phone">N/A</span></li>
-          <li>
-            <strong>Bio:</strong>
-            <span id="user-bio">Tell people what you enjoy.</span>
-          </li>
           <li>
             <strong>Member Since:</strong>
             <span id="user-joined">January 2025</span>
@@ -70,16 +64,16 @@
         <button id="logout-btn" type="button">Logout</button>
       </section>
 
-      <!-- FAVORITED EVENTS -->
-      <section id="favorite-events">
-        <h3>Your Favorited Events</h3>
+      <!-- REGISTERED EVENTS -->
+      <section id="registered-events">
+        <h3>Your Registered Events</h3>
 
-        <div id="favorite-events-container">
-          <!-- Example favorite event card -->
-          <div class="favorite-event-card">
-            <h4>Sample Favorited Event</h4>
+        <div id="registered-events-container">
+          <!-- Example registered event card -->
+          <div class="registered-event-card">
+            <h4>Sample Registered Event</h4>
             <p class="event-details">Location • Date • Time</p>
-            <a class="details-btn" href="favorites.html">View Favorites</a>
+            <button class="details-btn">View Details</button>
           </div>
 
           <!-- More cards inserted by JS -->

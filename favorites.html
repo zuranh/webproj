@@ -10,7 +10,192 @@
     <meta name="author" content="Event Finder Team" />
     <link rel="stylesheet" href="favorites.css" />
     <title>Favorites | Event Finder</title>
-    
+    <style>
+      .favorites-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 25px;
+        padding: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .favorite-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
+        border: 2px solid transparent;
+      }
+
+      .favorite-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+        border-color: #667eea;
+      }
+
+      .favorite-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      .favorite-info {
+        padding: 20px;
+      }
+
+      .favorite-info h3 {
+        margin: 0 0 10px 0;
+        color: #333;
+        font-size: 1.3rem;
+      }
+
+      .event-details {
+        color: #666;
+        margin: 10px 0;
+        line-height: 1.6;
+      }
+
+      .event-price {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        margin: 10px 0;
+      }
+
+      .event-genres {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 10px 0;
+      }
+
+      .genre-tag {
+        background: #f0f0f0;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .favorite-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .details-btn,
+      .remove-btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .details-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+      }
+
+      .details-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+
+      .remove-btn {
+        background: #fff;
+        color: #ff6b6b;
+        border: 2px solid #ff6b6b;
+      }
+
+      .remove-btn:hover {
+        background: #ff6b6b;
+        color: white;
+        transform: translateY(-2px);
+      }
+
+      .loading {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+        font-size: 1.2rem;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        color: #999;
+      }
+
+      .empty-state h3 {
+        font-size: 2rem;
+        margin-bottom: 15px;
+      }
+
+      .empty-state p {
+        font-size: 1.1rem;
+        margin-bottom: 25px;
+      }
+
+      .browse-btn {
+        display: inline-block;
+        padding: 15px 35px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0 3s;
+      }
+
+      .browse-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .favorited-date {
+        color: #999;
+        font-size: 0.85rem;
+        margin-top: 10px;
+      }
+
+      .auth-required {
+        text-align: center;
+        padding: 80px 20px;
+      }
+
+      .auth-required h2 {
+        color: #333;
+        margin-bottom: 15px;
+      }
+
+      .login-btn {
+        display: inline-block;
+        padding: 15px 35px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 25px;
+        font-weight: 600;
+        margin-top: 20px;
+        transition: all 0.3s;
+      }
+
+      .login-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      }
+    </style>
   </head>
   <body>
     <a class="skip-link" href="#favorites-section">Skip to content</a>
@@ -47,6 +232,235 @@
       <p class="disclaimer">Discover and save your favorite events.</p>
     </footer>
 
-    <script type="module" src="scripts/favorites.js"></script>
+    <!-- Firebase -->
+    <script type="module">
+      import { auth } from "/web-proj/firebase-config.js";
+      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      // Make auth available globally
+      window.firebaseAuth = auth;
+      window.onAuthStateChanged = onAuthStateChanged;
+    </script>
+
+    <script>
+      let currentUser = null;
+      let favorites = [];
+
+      // Initialize
+      window.addEventListener("DOMContentLoaded", () => {
+        onAuthStateChanged(window.firebaseAuth, async (firebaseUser) => {
+          if (firebaseUser) {
+            await loadCurrentUser(firebaseUser);
+            updateUIForLoggedIn();
+            await loadFavorites();
+          } else {
+            showAuthRequired();
+          }
+        });
+      });
+
+      // Load current user
+      async function loadCurrentUser(firebaseUser) {
+        try {
+          const response = await fetch("/web-proj/api/me.php", {
+            headers: { "X-Firebase-UID": firebaseUser.uid },
+          });
+          const data = await response.json();
+          if (data.user) {
+            currentUser = data.user;
+          }
+        } catch (error) {
+          console.error("Failed to load user:", error);
+        }
+      }
+
+      // Update UI for logged in user
+      function updateUIForLoggedIn() {
+        if (currentUser && ["admin", "owner"].includes(currentUser.role)) {
+          document.getElementById("admin-link").style.display = "block";
+        }
+      }
+
+      // Show auth required message
+      function showAuthRequired() {
+        const container = document.getElementById("favorites-container");
+        container.innerHTML = `
+                <div class="auth-required">
+                    <h2>🔒 Login Required</h2>
+                    <p>Please log in to view your favorite events.</p>
+                    <a href="/web-proj/login.html" class="login-btn">Go to Login</a>
+                </div>
+            `;
+      }
+
+      // Load favorites
+      async function loadFavorites() {
+        const container = document.getElementById("favorites-container");
+
+        try {
+          const firebaseUser = window.firebaseAuth.currentUser;
+          const response = await fetch("/web-proj/api/favorites.php", {
+            headers: { "X-Firebase-UID": firebaseUser.uid },
+          });
+          const data = await response.json();
+
+          if (data.success) {
+            favorites = data.favorites;
+            document.getElementById(
+              "favorites-subtitle"
+            ).textContent = `You have ${favorites.length} saved event${
+              favorites.length !== 1 ? "s" : ""
+            }`;
+            renderFavorites();
+          } else {
+            throw new Error(data.error || "Failed to load favorites");
+          }
+        } catch (error) {
+          console.error("Failed to load favorites:", error);
+          container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>⚠️ Error</h3>
+                        <p>Failed to load your favorites. Please try again. </p>
+                       <a href="/web-proj/index.html" class="browse-btn">Go Home</a>
+                    </div>
+                `;
+        }
+      }
+
+      // Render favorites
+      function renderFavorites() {
+        const container = document.getElementById("favorites-container");
+
+        if (favorites.length === 0) {
+          container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>💔 No Favorites Yet</h3>
+                        <p>You haven't saved any events yet. Start exploring!</p>
+                        <a href="/web-proj/index.html" class="browse-btn">Browse Events</a>
+                    </div>
+                `;
+          return;
+        }
+
+        container.innerHTML = '<div class="favorites-grid"></div>';
+        const grid = container.querySelector(".favorites-grid");
+
+        favorites.forEach((event) => {
+          const card = document.createElement("div");
+          card.className = "favorite-card";
+
+          const imageUrl =
+            event.image_url ||
+            "https://via. placeholder.com/400x200?text=Event";
+          const price =
+            event.price > 0 ? `$${parseFloat(event.price).toFixed(2)}` : "FREE";
+          const favoritedDate = new Date(event.favorited_at).toLocaleDateString(
+            "en-US",
+            {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            }
+          );
+
+          card.innerHTML = `
+                    <img src="${imageUrl}" alt="${
+            event.title
+          }" class="favorite-image" onerror="this.src='https://via.placeholder.com/400x200?text=Event'">
+                    
+                    <div class="favorite-info">
+                        <h3>${event.title}</h3>
+                        
+                        <p class="event-details">
+                            📍 ${event.location || "Location TBA"}<br>
+                            📅 ${event.date || "Date TBA"} ${
+            event.time ? "• 🕐 " + event.time : ""
+          }<br>
+                            ${
+                              event.age_restriction
+                                ? `🔞 ${event.age_restriction}+ • `
+                                : ""
+                            }
+                        </p>
+                        
+                        <span class="event-price">${price}</span>
+                        
+                        <div class="event-genres">
+                            ${(event.genre_icons || [])
+                              .map(
+                                (icon, i) => `
+                                <span class="genre-tag">
+                                    <span>${icon}</span>
+                                    <span>${event.genres[i]}</span>
+                                </span>
+                            `
+                              )
+                              .join("")}
+                        </div>
+                        
+                        <p class="favorited-date">❤️ Saved on ${favoritedDate}</p>
+                        
+                        <div class="favorite-actions">
+                            <button class="details-btn" onclick="viewEvent(${
+                              event.id
+                            })">View Details</button>
+                            <button class="remove-btn" onclick="removeFavorite(${
+                              event.id
+                            })">Remove</button>
+                        </div>
+                    </div>
+                `;
+
+          grid.appendChild(card);
+        });
+      }
+
+      // Remove favorite
+      async function removeFavorite(eventId) {
+        if (!confirm("Remove this event from your favorites?")) {
+          return;
+        }
+
+        try {
+          const firebaseUser = window.firebaseAuth.currentUser;
+          const response = await fetch(
+            `/web-proj/api/favorites.php?event_id=${eventId}`,
+            {
+              method: "DELETE",
+              headers: { "X-Firebase-UID": firebaseUser.uid },
+            }
+          );
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Remove from local array
+            favorites = favorites.filter((f) => f.id !== eventId);
+
+            // Update subtitle
+            document.getElementById(
+              "favorites-subtitle"
+            ).textContent = `You have ${favorites.length} saved event${
+              favorites.length !== 1 ? "s" : ""
+            }`;
+
+            // Re-render
+            renderFavorites();
+          } else {
+            alert(
+              "Failed to remove favorite: " + (data.error || "Unknown error")
+            );
+          }
+        } catch (error) {
+          console.error("Failed to remove favorite:", error);
+          alert("Failed to remove favorite. Please try again.");
+        }
+      }
+
+      // View event details
+      function viewEvent(eventId) {
+        window.location.href = `/web-proj/event.html?id=${eventId}`;
+      }
+    </script>
   </body>
 </html>
