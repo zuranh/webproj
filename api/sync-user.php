@@ -38,18 +38,40 @@ $name = $hasName ? trim((string) $data['name']) : null;
 $age = $hasAge ? $data['age'] : null;
 
 $errors = [];
-if ($hasName) {
-    if ($name === '') {
+
+// Validate a required full name and return a sanitized version
+function validateFullName(?string $value): array {
+    $errors = [];
+    $normalized = null;
+
+    $candidate = trim((string) $value);
+    if ($candidate === '') {
         $errors[] = 'Full name is required';
-    } else {
-        $parts = preg_split('/\s+/', $name, -1, PREG_SPLIT_NO_EMPTY);
-        $validParts = array_filter($parts, fn($part) => preg_match("/^[A-Za-z][A-Za-z'\\-]{1,}$/", $part));
-        if (count($parts) < 2) {
-            $errors[] = 'Please provide first and last name';
-        } elseif (count($validParts) !== count($parts)) {
-            $errors[] = 'Names should only include letters (plus optional hyphen/apostrophe)';
-        }
+        return [$errors, $normalized];
     }
+
+    $parts = preg_split('/\s+/', $candidate, -1, PREG_SPLIT_NO_EMPTY);
+    $validParts = array_filter(
+        $parts,
+        fn($part) => preg_match("/^[A-Za-z][A-Za-z'\\-]{1,}[A-Za-z]$/", $part)
+    );
+
+    if (count($parts) < 2) {
+        $errors[] = 'Please provide first and last name';
+    } elseif (count($validParts) !== count($parts)) {
+        $errors[] = 'Names should only include letters (plus optional hyphen/apostrophe)';
+    } elseif (mb_strlen($candidate) < 5) {
+        $errors[] = 'Full name is too short';
+    } else {
+        $normalized = preg_replace('/\s+/', ' ', $candidate);
+    }
+
+    return [$errors, $normalized];
+}
+
+if ($hasName) {
+    [$nameErrors, $name] = validateFullName($name);
+    $errors = array_merge($errors, $nameErrors);
 }
 if ($hasAge) {
     if (!is_numeric($age)) {
@@ -90,7 +112,21 @@ try {
         ]);
         $userId = $existing['id'];
     } else {
-        $nameToSave = $name ?? ($firebaseUser['displayName'] ?? 'User');
+        // For new records, require a valid name (either provided or from Firebase profile)
+        if (!$hasName) {
+            [$nameErrors, $nameFromProfile] = validateFullName($firebaseUser['displayName'] ?? '');
+            $errors = array_merge($errors, $nameErrors);
+            $nameToSave = $nameFromProfile;
+        } else {
+            $nameToSave = $name;
+        }
+
+        if (!empty($errors)) {
+            http_response_code(422);
+            echo json_encode(['error' => implode('. ', $errors)]);
+            exit;
+        }
+
         $ageToSave = $hasAge ? $age : null;
 
         // Insert new user

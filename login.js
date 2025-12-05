@@ -2,6 +2,8 @@ import { auth } from "./firebase-config.js";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  updateProfile,
+  signOut,
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 const loginTab = document.getElementById("login-tab");
@@ -13,12 +15,16 @@ const switchToLogin = document.getElementById("switch-to-login");
 
 function isFullName(value) {
   if (!value) return false;
-  const parts = value
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
+  const trimmed = value.trim();
+  const parts = trimmed.split(/\s+/).filter(Boolean);
   if (parts.length < 2) return false;
-  return parts.every((part) => /^[A-Za-z][A-Za-z'\-]{1,}$/.test(part));
+
+  // Require each part to be at least two alphabetic characters (allowing hyphen/apostrophe)
+  const partOk = parts.every((part) => /^[A-Za-z][A-Za-z'\-]{1,}[A-Za-z]$/.test(part));
+  if (!partOk) return false;
+
+  // Prevent obviously short "names" like "A B"
+  return trimmed.replace(/\s+/g, " ").length >= 5;
 }
 
 function isStrongPassword(value) {
@@ -181,11 +187,14 @@ signupForm.addEventListener("submit", async (e) => {
     );
     const user = userCredential.user;
 
+    // Persist the provided full name into the Firebase profile for downstream flows
+    await updateProfile(user, { displayName: name });
+
     // Get Firebase ID token
     const idToken = await user.getIdToken();
 
     // Send additional user data to backend
-    await fetch("api/sync-user.php", {
+    const syncRes = await fetch("api/sync-user.php", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -198,6 +207,13 @@ signupForm.addEventListener("submit", async (e) => {
         age: parseInt(age),
       }),
     });
+
+    if (!syncRes.ok) {
+      const data = await syncRes.json().catch(() => ({}));
+      const message = data.error || "Could not finish account setup";
+      await signOut(auth);
+      throw new Error(message);
+    }
 
     // Redirect to account page
     window.location.href = "account.html";
