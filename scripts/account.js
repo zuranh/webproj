@@ -10,6 +10,28 @@ const changePasswordBtn = document.getElementById("change-password-btn");
 const deleteAccountBtn = document.getElementById("delete-account-btn");
 let currentUser = null;
 
+// Ensure a database record exists for the signed-in Firebase user.
+async function syncUserRecord(user) {
+  const idToken = await user.getIdToken();
+  const res = await fetch("api/sync-user.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${idToken}`,
+    },
+    body: JSON.stringify({
+      uid: user.uid,
+      email: user.email,
+      name: user.displayName || undefined,
+    }),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || "Failed to sync account");
+  }
+}
+
 // Load user profile
 async function loadProfile() {
   onAuthStateChanged(auth, async (user) => {
@@ -26,13 +48,21 @@ async function loadProfile() {
       const idToken = await user.getIdToken();
 
       // Fetch user profile from backend
-      const res = await fetch("api/me.php", {
+      let res = await fetch("api/me.php", {
         headers: { Authorization: `Bearer ${idToken}` },
       });
 
       if (res.status === 401) {
         window.location.href = "login.html";
         return;
+      }
+
+      // If the record is missing (e.g., after deletion), re-sync and retry once
+      if (res.status === 404) {
+        await syncUserRecord(user);
+        res = await fetch("api/me.php", {
+          headers: { Authorization: `Bearer ${idToken}` },
+        });
       }
 
       const data = await res.json();
