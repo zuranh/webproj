@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin – Users</title>
+    <link rel="stylesheet" href="admin-page.css" />
+    <link rel="stylesheet" href="admin-users.css" />
+  </head>
+
+  <body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">Eventify Admin</div>
+
+      <nav>
+        <a class="nav-link" href="admin.html">Admin profile</a>
+        <a class="nav-link active" href="admin-users.html">Admin Users</a>
+        <a class="nav-link" href="addEvents.html">Add Events</a>
+        <a class="nav-link" href="edit-events.html">Edit Events</a>
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="admin-actions.html">Admin Actions</a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="content">
+      <!-- PAGE HEADER -->
+      <header class="page-header">
+        <h1>User Management</h1>
+        <p>View and manage all registered users (Owner only)</p>
+      </header>
+
+      <div id="alert-container"></div>
+
+      <!-- STATS BAR -->
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-number" id="stat-total">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Owners</div>
+          <div class="stat-number" id="stat-owners">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Admins</div>
+          <div class="stat-number" id="stat-admins">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Regular Users</div>
+          <div class="stat-number" id="stat-users">0</div>
+        </div>
+      </div>
+
+      <!-- USER LIST -->
+      <div id="users-container" class="loading">
+        <p>Loading users...</p>
+      </div>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+        <p>© 2025 Eventify Admin</p>
+      </footer>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.x/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x/firebase-auth-compat.js"></script>
+    <script src="/firebase-compat-init.js"></script>
+    <script src="/scripts/admin-auth.js"></script>
+    <script src="/scripts/admin-users.js"></script>
+  </body>
+</html>

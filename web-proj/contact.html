@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Eventify</title>
+    <meta name="description" content="Contact Eventify for questions, support, or feedback.">
+    <link rel="stylesheet" href="contact.css">
+</head>
+
+<body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+<header class="tm-navbar">
+    <div class="tm-nav-content">
+
+        <!-- Logo -->
+        <div class="tm-logo">
+            <a href="index.html">Eventify</a>
+        </div>
+
+        <!-- Links -->
+        <nav class="tm-links">
+            <a href="index.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="contact.html" class="active">Contact</a>
+        </nav>
+
+        <!-- Login -->
+        <a href="login.html" class="tm-login-btn">Login</a>
+
+    </div>
+</header>
+
+    <main id="main-content">
+        <section class="contact-wrapper">
+            <h2>Contact Us</h2>
+            <p class="contact-subtext">
+                We’re here to help with questions, feedback, or technical issues.
+            </p>
+
+            <form id="contact-form">
+                <div class="input-group">
+                    <label for="name">Your Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="email">Your Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="message">Your Message</label>
+                    <textarea id="message" name="message" required></textarea>
+                </div>
+
+                <button type="submit" class="tm-btn">Send Message</button>
+            </form>
+        </section>
+    </main>
+
+    <footer class="tm-footer">
+        <p>&copy; 2025 Eventify</p>
+        <p>Disclaimer: Demo project only.</p>
+    </footer>
+</body>
+</html>

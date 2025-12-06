@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin – Actions Log</title>
+    <link rel="stylesheet" href="admin-page.css" />
+    <link rel="stylesheet" href="admin-actions.css" />
+  </head>
+
+  <body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">Eventify Admin</div>
+
+      <nav>
+        <a class="nav-link" href="admin.html">Admin profile</a>
+        <a class="nav-link" href="admin-users.html">Admin Users</a>
+        <a class="nav-link" href="addEvents.html">Add Events</a>
+        <a class="nav-link" href="edit-events.html">Edit Events</a>
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link active" href="admin-actions.html">Admin Actions</a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="content">
+      <header class="page-header">
+        <h1>Admin Action Log</h1>
+        <p>Review recent owner/admin actions for auditing.</p>
+      </header>
+
+      <div class="panel">
+        <div class="actions-toolbar">
+          <h3>Recent Activity</h3>
+          <button class="refresh-btn" id="refresh-actions">Refresh</button>
+        </div>
+        <div class="table-wrapper">
+          <table class="glass-table actions-table" id="actions-table">
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>By</th>
+                <th>Target</th>
+                <th>Details</th>
+                <th>When</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="5" class="loading-row">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <footer class="footer">
+        <p>© 2025 Eventify Admin</p>
+      </footer>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.x/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x/firebase-auth-compat.js"></script>
+    <script src="/firebase-compat-init.js"></script>
+    <script src="/scripts/admin-auth.js"></script>
+    <script src="/scripts/admin-actions.js"></script>
+  </body>
+</html>

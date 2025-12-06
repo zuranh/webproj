@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Event details and registration page for Event Finder."
+    />
+    <meta name="author" content="Event Finder Team" />
+    <link rel="stylesheet" href="event.css" />
+    <title>Event Details | Event Finder</title>
+      </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <!-- HEADER -->
+    <header id="navbar">
+      <div class="tm-logo">
+        <a href="index.html">EventFinder</a>
+      </div>
+      <nav class="tm-links">
+        <a href="index.html">Home</a>
+        <a href="favorites.html" id="favorites-link">Favorites</a>
+        <a href="registrations.html" id="registrations-link" style="display: none">Registrations</a>
+        <a href="profile.html" id="profile-link">Profile</a>
+        <a href="admin.html" id="admin-link" style="display: none">Admin</a>
+      </nav>
+    </header>
+
+    <!-- Loading State -->
+    <div id="loading-container" class="loading">
+      <p>⏳ Loading event details...</p>
+    </div>
+
+    <!-- Main Content (hidden until loaded) -->
+    <div id="event-content" style="display: none">
+      <!-- HERO / BANNER -->
+      <section id="event-hero">
+        <img
+          src="https://via.placeholder.com/1200x400?text=Event"
+          alt="Event image"
+          id="event-main-image"
+        />
+        <div id="event-title-box">
+          <h2 id="event-title">Loading...</h2>
+          <p id="event-subtitle">Loading...</p>
+          <div class="event-genres" id="event-genres"></div>
+        </div>
+      </section>
+
+      <!-- MAIN CONTENT -->
+      <main id="main-content">
+        <div class="event-grid">
+          <!-- Left Column -->
+          <div class="event-info-column">
+            <section id="description">
+              <h3>📝 Description</h3>
+              <p id="event-description">Loading description...</p>
+            </section>
+
+            <section id="info-section">
+              <h3>ℹ️ Event Information</h3>
+              <ul>
+                <li><strong>📅 Date:</strong> <span id="info-date">-</span></li>
+                <li><strong>🕐 Time:</strong> <span id="info-time">-</span></li>
+                <li>
+                  <strong>📍 Location:</strong>
+                  <span id="info-location">-</span>
+                </li>
+                <li>
+                  <strong>💰 Price:</strong> <span id="info-price">-</span>
+                </li>
+                <li>
+                  <strong>🔞 Age Restriction:</strong>
+                  <span id="info-age">-</span>
+                </li>
+                <li>
+                  <strong>📊 Status:</strong> <span id="info-status">-</span>
+                </li>
+              </ul>
+
+              <div class="creator-info" id="creator-info" style="display: none">
+                <strong>👤 Created by:</strong> <span id="creator-name">-</span
+                ><br />
+                <small>Posted on <span id="created-date">-</span></small>
+              </div>
+            </section>
+
+            <section id="location-section">
+              <h3>🗺️ Location</h3>
+              <div id="map-container">
+                <p>Map integration coming soon</p>
+              </div>
+            </section>
+          </div>
+
+          <!-- Right Column -->
+          <aside class="ticket-box">
+              <div class="ticket-card">
+                <h3>🎟️ Tickets & Registration</h3>
+                <div class="price-display" id="ticket-price">$0.00</div>
+                <p id="ticket-info">Get your tickets now!</p>
+                <button id="register-btn">🎫 Register Now</button>
+                <button id="favorite-btn">♡ Add to Favorites</button>
+                <p id="register-status" class="status-text" aria-live="polite"></p>
+              </div>
+            </aside>
+          </div>
+      </main>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>© 2025 Event Finder</p>
+      <p class="disclaimer">Discover amazing events near you.</p>
+    </footer>
+
+    <!-- Firebase: expose auth and onAuthStateChanged to the page -->
+    <script type="module" src="scripts/event.js"></script>
+    </body>
+</html>

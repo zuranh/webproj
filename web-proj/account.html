@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="account.css" />
+    <meta
+      name="description"
+      content="Your Event Finder profile — view and manage your account and registered events."
+    />
+    <meta name="author" content="Event Finder Team" />
+    <title>Your Profile | Event Finder</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#profile-main">Skip to content</a>
+
+    <!-- ========================= -->
+    <!--          NAVBAR           -->
+    <!-- ========================= -->
+    <header id="navbar">
+      <h1>Event Finder</h1>
+
+      <nav>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="favorites.html">Favorites</a></li>
+          <li><a href="registrations.html">Registrations</a></li>
+          <li><a href="profile.html" class="active">Profile</a></li>
+          <li id="admin-link" style="display: none"><a href="admin.html">Admin</a></li>
+          <li><a href="login.html">Logout</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- ========================= -->
+    <!--        PROFILE HEADER      -->
+    <!-- ========================= -->
+    <section id="profile-header">
+      <h2>Your Profile</h2>
+      <p>Manage your information and view your activity.</p>
+    </section>
+
+    <!-- ========================= -->
+    <!--      PROFILE CONTENT       -->
+    <!-- ========================= -->
+    <main id="profile-main">
+      <!-- USER INFO CARD -->
+      <section id="user-info-card">
+        <h3>Account Information</h3>
+
+        <ul class="user-info-list">
+          <li><strong>Name:</strong> <span id="user-name">John Doe</span></li>
+          <li>
+            <strong>Email:</strong>
+            <span id="user-email">john@example.com</span>
+          </li>
+          <li><strong>Age:</strong> <span id="user-age">22</span></li>
+          <li>
+            <strong>Member Since:</strong>
+            <span id="user-joined">January 2025</span>
+          </li>
+        </ul>
+
+        <button id="edit-profile-btn" type="button">Edit Profile</button>
+        <button id="change-password-btn" type="button">Change Password</button>
+        <button id="logout-btn" type="button">Logout</button>
+      </section>
+
+      <!-- REGISTERED EVENTS -->
+      <section id="registered-events">
+        <h3>Your Registered Events</h3>
+
+        <div id="registered-events-container">
+          <!-- Example registered event card -->
+          <div class="registered-event-card">
+            <h4>Sample Registered Event</h4>
+            <p class="event-details">Location • Date • Time</p>
+            <button class="details-btn">View Details</button>
+          </div>
+
+          <!-- More cards inserted by JS -->
+        </div>
+      </section>
+
+      <!-- USER SETTINGS -->
+      <section id="user-settings">
+        <h3>Settings</h3>
+
+        <button id="notification-settings-btn">Notification Settings</button>
+        <button id="delete-account-btn">Delete Account</button>
+      </section>
+    </main>
+
+    <!-- ========================= -->
+    <!--          FOOTER           -->
+    <!-- ========================= -->
+    <footer>
+      <script src="scripts/account.js" type="module"></script>
+      <p>© 2025 Event Finder</p>
+      <p class="disclaimer">
+        Disclaimer: This site is for educational/demo purposes only. Do not use
+        for production.
+      </p>
+      <p class="ai-disclosure">
+        AI-assistance: Some code or content may have been generated or assisted
+        using AI tools — see <a href="README.md">README</a>.
+      </p>
+      <p class="last-updated">Last updated: 2025-11-25</p>
+    </footer>
+  </body>
+</html>

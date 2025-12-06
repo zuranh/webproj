@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Your saved favorite events on Event Finder. "
+    />
+    <meta name="author" content="Event Finder Team" />
+    <link rel="stylesheet" href="favorites.css" />
+    <title>Favorites | Event Finder</title>
+      </head>
+  <body>
+    <a class="skip-link" href="#favorites-section">Skip to content</a>
+
+    <!-- HEADER -->
+    <header id="navbar">
+      <div class="tm-logo">
+        <a href="index.html">EventFinder</a>
+      </div>
+      <nav class="tm-links">
+        <a href="index.html">Home</a>
+        <a href="favorites.html" class="active">Favorites</a>
+        <a href="registrations.html" id="registrations-link" style="display: none">Registrations</a>
+        <a href="profile.html" id="profile-link">Profile</a>
+        <a href="admin.html" id="admin-link" style="display: none">Admin</a>
+      </nav>
+    </header>
+
+    <!-- FAVORITES HEADER -->
+    <section id="favorites-header">
+      <h2>Your Favorite Events</h2>
+      <p id="favorites-subtitle">A collection of events you've saved.</p>
+    </section>
+
+    <!-- FAVORITES GRID -->
+    <main id="favorites-section">
+      <div id="favorites-container" class="loading">
+        <p>⏳ Loading your favorites...</p>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>© 2025 Event Finder</p>
+      <p class="disclaimer">Discover and save your favorite events.</p>
+    </footer>
+
+    <!-- Firebase -->
+    <script type="module" src="scripts/favorites.js"></script>
+  </body>
+</html>

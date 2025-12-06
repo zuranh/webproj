@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Edit Event | Event Finder</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Admin page to edit an existing event in Event Finder."
+    />
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <header class="admin-header">
+      <h1>Event Finder — Admin</h1>
+      <nav>
+        <ul>
+          <li><a href="index.html">Public Site</a></li>
+          <li><a href="admin.html">Dashboard</a></li>
+          <li><a href="addEvents.html">Add Event</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-section">
+        <h2>Edit Event</h2>
+        <p>Update the details of an existing event.</p>
+
+        <div id="form-alert" class="alert"></div>
+
+        <form id="edit-event-form" class="event-form">
+          <!-- Title -->
+          <div class="input-group">
+            <label for="title">Event Title</label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              placeholder="Event title"
+              required
+            />
+          </div>
+
+          <!-- Description -->
+          <div class="input-group">
+            <label for="description">Description</label>
+            <textarea
+              id="description"
+              name="description"
+              rows="4"
+              placeholder="Describe your event..."
+              required
+            ></textarea>
+          </div>
+
+          <!-- Date & Time -->
+          <div class="two-column">
+            <div class="input-group">
+              <label for="date">Date</label>
+              <input type="date" id="date" name="date" required />
+            </div>
+
+            <div class="input-group">
+              <label for="time">Time</label>
+              <input type="time" id="time" name="time" required />
+            </div>
+          </div>
+
+          <!-- Location -->
+          <div class="input-group">
+            <label for="location">Location</label>
+            <input
+              type="text"
+              id="location"
+              name="location"
+              placeholder="Location"
+              required
+            />
+          </div>
+
+          <!-- Image upload -->
+          <div class="input-group">
+            <label for="image_file">Change Image (optional)</label>
+            <input
+              type="file"
+              id="image_file"
+              name="image_file"
+              accept="image/*"
+            />
+            <small>Leave empty to keep current image.</small>
+          </div>
+
+          <!-- Preview -->
+          <div
+            class="input-group"
+            id="image-preview-wrapper"
+            style="display: none;"
+          >
+            <label>Current / New Image</label>
+            <img
+              id="image-preview"
+              alt="Event image preview"
+              style="max-width: 200px; display: block; border-radius: 6px;"
+            />
+          </div>
+
+          <!-- Submit -->
+          <div class="input-group">
+            <button type="submit" id="submit-btn">Save Changes</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <footer class="admin-footer">
+      <p>© 2025 Event Finder — Admin Panel</p>
+    </footer>
+
+    <script type="module" src="scripts/admin-edit-event.js"></script>
+  </body>
+</html>

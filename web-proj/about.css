@@ -1,0 +1,113 @@
+/* ========================= */
+/*      GLOBAL STYLES        */
+/* ========================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+}
+
+body {
+    background: #f9f9f9;
+    color: #222;
+    line-height: 1.6;
+}
+
+/* ========================= */
+/*        HEADER             */
+/* ========================= */
+header {
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0ab4ff;
+}
+
+header nav a {
+    margin-left: 25px;
+    text-decoration: none;
+    color: #555;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+header nav a:hover {
+    color: #0ab4ff;
+}
+
+/* ========================= */
+/*         MAIN              */
+/* ========================= */
+.main-container {
+    max-width: 1000px;
+    margin: 3rem auto;
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.about-section {
+    background: #fff;
+    padding: 2rem 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.about-section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+
+.about-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #0ab4ff;
+    transition: color 0.3s;
+}
+
+.about-section:hover h2 {
+    color: #36c4ff;
+}
+
+.about-section p {
+    font-size: 1.1rem;
+    color: #444;
+    line-height: 1.7;
+}
+
+/* ========================= */
+/*         FOOTER            */
+/* ========================= */
+footer {
+    background: #fff;
+    border-top: 1px solid #eee;
+    padding: 2rem;
+    text-align: center;
+    color: #777;
+    font-size: 0.9rem;
+}
+
+footer a {
+    color: #0ab4ff;
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
