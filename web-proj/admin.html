@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="admin-page.css" />
+  </head>
+
+  <body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">Eventify Admin</div>
+
+      <nav>
+        <a class="nav-link active" href="admin.html">Admin profile</a>
+        <a class="nav-link" href="admin-users.html">Admin Users</a>
+        <a class="nav-link" href="addEvents.html">Add Events</a>
+        <a class="nav-link" href="edit-event.html">Edit Events</a>
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="admin-actions.html">Admin Actions</a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="content">
+      <div class="admin-header">
+        <h2>Admin Dashboard</h2>
+        <div class="admin-user-info">
+          <span class="admin-user-name" id="admin-user-name">Loading...</span>
+          <span class="role-badge" id="admin-user-role">ADMIN</span>
+        </div>
+      </div>
+
+      <header class="page-header">
+        <h1>Overview</h1>
+        <p>Monitor events, users, and registrations at a glance.</p>
+      </header>
+
+      <section class="stats-grid" id="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Events</div>
+          <div class="stat-value" id="stat-events">--</div>
+          <div class="stat-sub" id="stat-upcoming">-- upcoming</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Users</div>
+          <div class="stat-value" id="stat-users">--</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Registrations</div>
+          <div class="stat-value" id="stat-registrations">--</div>
+          <div class="stat-sub" id="stat-cancellations">-- canceled</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Recent Activity</div>
+          <div class="stat-value" id="stat-recent">--</div>
+          <div class="stat-sub">Last 24h events created/updated</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Capacity</div>
+          <div class="stat-value" id="stat-capacity">--</div>
+          <div class="stat-sub" id="stat-available">-- available</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Utilization</div>
+          <div class="stat-value" id="stat-utilization">--%</div>
+          <div class="stat-sub">Registered vs. capacity</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h3>Recent Registrations</h3>
+          <a class="panel-link" href="registrations.html">View all</a>
+        </div>
+        <div class="table-wrapper">
+          <table class="glass-table" id="recent-registrations">
+            <thead>
+              <tr>
+                <th>Event</th>
+                <th>User</th>
+                <th>Status</th>
+                <th>When</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="4" class="loading-row">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h3>Latest Events</h3>
+          <a class="panel-link" href="edit-events.html">Manage events</a>
+        </div>
+        <div class="table-wrapper">
+          <table class="glass-table" id="recent-events">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Creator</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="4" class="loading-row">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" id="genre-panel">
+        <div class="panel-header">
+          <h3>Genre Breakdown</h3>
+        </div>
+        <div class="table-wrapper">
+          <table class="glass-table" id="genre-breakdown">
+            <thead>
+              <tr>
+                <th>Genre</th>
+                <th>Events</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="2" class="loading-row">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" id="actions-panel">
+        <div class="panel-header">
+          <h3>Admin Activity</h3>
+          <a class="panel-link" href="admin-actions.html">View log</a>
+        </div>
+        <div class="table-wrapper">
+          <table class="glass-table" id="recent-actions">
+            <thead>
+              <tr>
+                <th>Admin</th>
+                <th>Action</th>
+                <th>Target</th>
+                <th>When</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td colspan="4" class="loading-row">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>© 2025 Eventify Admin</p>
+      </footer>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.x/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x/firebase-auth-compat.js"></script>
+    <script src="/firebase-compat-init.js"></script>
+    <script src="/scripts/admin-auth.js"></script>
+    <script src="/scripts/admin-dashboard.js"></script>
+  </body>
+</html>

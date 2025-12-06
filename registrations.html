@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="View and manage your event registrations on Event Finder." />
+    <meta name="author" content="Event Finder Team" />
+    <link rel="stylesheet" href="registrations.css" />
+    <title>My Registrations | Event Finder</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#registrations-section">Skip to content</a>
+
+    <header id="navbar">
+      <div class="tm-logo">
+        <a href="index.html">EventFinder</a>
+      </div>
+      <nav class="tm-links">
+        <a href="index.html">Home</a>
+        <a href="favorites.html">Favorites</a>
+        <a href="registrations.html" class="active">Registrations</a>
+        <a href="profile.html" id="profile-link">Profile</a>
+        <a href="admin.html" id="admin-link" style="display: none">Admin</a>
+      </nav>
+    </header>
+
+    <section id="registrations-header">
+      <h2>Your Registrations</h2>
+      <p id="registrations-subtitle">Track the events you've signed up for.</p>
+    </section>
+
+    <main id="registrations-section">
+      <div id="registrations-container" class="loading">
+        <p>⏳ Loading your registrations...</p>
+      </div>
+    </main>
+
+    <footer>
+      <p>© 2025 Event Finder</p>
+      <p class="disclaimer">Discover and register for great events.</p>
+    </footer>
+
+    <script type="module" src="scripts/registrations.js"></script>
+  </body>
+</html>
