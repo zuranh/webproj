@@ -98,11 +98,11 @@
       <h2 class="logo">Eventify Admin</h2>
       <nav>
         <a class="nav-link" href="admin.html">Admin profile</a>
-        <a class="nav-link" href="admin-users. html" data-require-owner
+        <a class="nav-link" href="admin-users.html" data-require-owner
           >Admin Users</a
         >
         <a class="nav-link active" href="addEvents.html">Add Events</a>
-        <a class="nav-link" href="edit-events. html">Edit Events</a>
+        <a class="nav-link" href="edit-events.html">Edit Events</a>
         <a class="nav-link" href="index.html">Home</a>
       </nav>
     </aside>
@@ -203,7 +203,31 @@
                 name="price"
                 min="0"
                 step="0.01"
-                placeholder="0. 00"
+                placeholder="0.00"
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="input-group">
+              <label>Capacity (0 = unlimited)</label>
+              <input
+                type="number"
+                id="capacity"
+                name="capacity"
+                min="0"
+                placeholder="e.g. 250"
+              />
+            </div>
+
+            <div class="input-group">
+              <label>Available Spots</label>
+              <input
+                type="number"
+                id="available_spots"
+                name="available_spots"
+                min="0"
+                placeholder="defaults to capacity"
               />
             </div>
           </div>
@@ -247,8 +271,8 @@
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.x/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.x/firebase-auth-compat.js"></script>
-    <script src="/firebase-config. js"></script>
-    <script src="/scripts/admin-auth. js"></script>
+    <script src="/firebase-config.js"></script>
+    <script src="/scripts/admin-auth.js"></script>
 
     <script>
       let availableGenres = [];
@@ -267,7 +291,7 @@
       // Load available genres
       async function loadGenres() {
         try {
-          const response = await fetch("/api/genres. php");
+          const response = await fetch("/api/genres.php");
           const data = await response.json();
 
           if (data.success) {
@@ -331,6 +355,13 @@
           btnLoader.style.display = "inline";
 
           // Collect form data
+          const rawCapacity = document.getElementById("capacity").value;
+          const rawAvailable = document.getElementById("available_spots").value;
+
+          const capacity = rawCapacity === "" ? 0 : Number(rawCapacity);
+          const availableSpots =
+            rawAvailable === "" ? capacity : Number(rawAvailable);
+
           const formData = {
             title: document.getElementById("title").value,
             description: document.getElementById("description").value,
@@ -342,6 +373,8 @@
             age_restriction:
               document.getElementById("age_restriction").value || null,
             price: document.getElementById("price").value || 0,
+            capacity,
+            available_spots: availableSpots,
             image_url: document.getElementById("image_url").value || null,
             status: document.querySelector('input[name="status"]:checked')
               .value,
@@ -375,8 +408,8 @@
 
             const data = await response.json();
 
-            if (data.success) {
-              showAlert("Event created successfully!  ", "success");
+            if (response.ok && data.success) {
+              showAlert("Event created successfully!", "success");
               // Reset form after 2 seconds
               setTimeout(() => {
                 document.getElementById("add-event-form").reset();
@@ -386,9 +419,12 @@
                 document
                   .querySelectorAll(".status-option")[0]
                   .classList.add("selected");
-              }, 2000);
+              }, 1200);
             } else {
-              showAlert(data.error || "Failed to create event", "error");
+              showAlert(
+                data.error || "Failed to create event. Please check the form.",
+                "error"
+              );
             }
           } catch (error) {
             console.error("Error creating event:", error);

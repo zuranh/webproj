@@ -11,18 +11,25 @@
 <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
     <header>
-        <h1>Confirmation</h1>
+        <h1>Registration Confirmation</h1>
         <nav>
             <a href="index.html">Home</a>
-            <a href="login.html">Login</a>
+            <a href="registrations.html">My Registrations</a>
+            <a href="favorites.html">Favorites</a>
         </nav>
     </header>
 
     <main id="main-content">
         <section>
-            <h2>Thank you!</h2>
-            <p>Your registration has been received successfully.</p>
-            <p>Please check your email for verification details.</p>
+            <h2 id="confirm-title">Processing your registration...</h2>
+            <p id="confirm-message">Please wait while we load your details.</p>
+            <div id="confirm-details" style="display:none;">
+                <p><strong>Event:</strong> <span id="event-name">—</span></p>
+                <p><strong>Date:</strong> <span id="event-date">—</span></p>
+                <p><strong>Location:</strong> <span id="event-location">—</span></p>
+                <p><strong>Status:</strong> <span id="registration-status">Registered</span></p>
+            </div>
+            <a href="index.html" class="back-btn">Back to Home</a>
         </section>
     </main>
 
@@ -32,5 +39,60 @@
         <p class="ai-disclosure">AI-assistance: Some content may have been generated or assisted using AI tools — see <a href="README.md">README</a>.</p>
         <p class="last-updated">Last updated: 2025-11-25</p>
     </footer>
+    <script type="module">
+      import { auth } from "./firebase-config.js";
+      import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+      const params = new URLSearchParams(window.location.search);
+      const eventId = params.get("event_id");
+
+      function renderError(message) {
+        document.getElementById("confirm-title").textContent = "Registration";
+        document.getElementById("confirm-message").textContent = message;
+        document.getElementById("confirm-details").style.display = "none";
+      }
+
+      async function loadDetails(user) {
+        if (!eventId) {
+          renderError("Missing event information for this confirmation.");
+          return;
+        }
+
+        try {
+          const res = await fetch(
+            `/web-proj/api/registrations.php?event_id=${encodeURIComponent(eventId)}`,
+            {
+              headers: { "X-Firebase-UID": user.uid },
+            }
+          );
+          const data = await res.json();
+
+          if (!res.ok || !data.success || !data.registration) {
+            throw new Error(data.error || "Registration not found");
+          }
+
+          const reg = data.registration;
+          document.getElementById("confirm-title").textContent = "You're registered!";
+          document.getElementById("confirm-message").textContent =
+            "We've saved your spot. You'll also see this event on My Registrations.";
+          document.getElementById("event-name").textContent = reg.event_name;
+          document.getElementById("event-date").textContent = reg.date || "TBA";
+          document.getElementById("event-location").textContent = reg.location || "Location TBA";
+          document.getElementById("registration-status").textContent = reg.status;
+          document.getElementById("confirm-details").style.display = "block";
+        } catch (err) {
+          console.error("Confirmation load error", err);
+          renderError(err.message);
+        }
+      }
+
+      onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+          renderError("Please sign in to view your registration details.");
+          return;
+        }
+        await loadDetails(user);
+      });
+    </script>
 </body>
 </html>

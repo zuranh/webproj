@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Registrations | Event Finder</title>
+    <link rel="stylesheet" href="registrations.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="page-header">
+      <h1>My Registrations</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="favorites.html">Favorites</a>
+        <a href="account.html">Account</a>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section class="summary-cards">
+        <div class="summary-card">
+          <p class="summary-label">Upcoming</p>
+          <p class="summary-value" id="upcoming-count">0</p>
+          <p class="summary-helper">Events you are set to attend</p>
+        </div>
+        <div class="summary-card">
+          <p class="summary-label">Past</p>
+          <p class="summary-value" id="past-count">0</p>
+          <p class="summary-helper">Finished events</p>
+        </div>
+        <div class="summary-card">
+          <p class="summary-label">Cancelled</p>
+          <p class="summary-value" id="cancelled-count">0</p>
+          <p class="summary-helper">Registrations you've cancelled</p>
+        </div>
+      </section>
+
+      <section class="list-section">
+        <div class="section-header">
+          <div>
+            <h2>Upcoming registrations</h2>
+            <p>Manage your seats and get event info</p>
+          </div>
+        </div>
+        <div id="upcoming-list" class="registration-list">
+          <p class="placeholder">Loading your registrations...</p>
+        </div>
+      </section>
+
+      <section class="list-section">
+        <div class="section-header">
+          <div>
+            <h2>Past & cancelled</h2>
+            <p>Review previous events</p>
+          </div>
+        </div>
+        <div id="past-list" class="registration-list">
+          <p class="placeholder">Loading...</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>© 2025 Event Finder</p>
+    </footer>
+
+    <script type="module" src="scripts/registrations.js"></script>
+  </body>
+</html>

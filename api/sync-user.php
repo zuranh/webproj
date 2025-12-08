@@ -38,15 +38,30 @@ $age = $data['age'] ?? null;
 try {
     $db = require __DIR__ . '/db.php';
     
-    // Check if user exists
-    $stmt = $db->prepare('SELECT id FROM users WHERE firebase_uid = :uid');
+    // Check if user exists by Firebase UID
+    $stmt = $db->prepare('SELECT * FROM users WHERE firebase_uid = :uid LIMIT 1');
     $stmt->execute([':uid' => $uid]);
     $existing = $stmt->fetch(PDO::FETCH_ASSOC);
-    
+
+    // If not found by UID, try matching by email (helps claim the seeded owner account)
+    if (!$existing) {
+        $emailStmt = $db->prepare('SELECT * FROM users WHERE email = :email LIMIT 1');
+        $emailStmt->execute([':email' => $email]);
+        $existing = $emailStmt->fetch(PDO::FETCH_ASSOC);
+
+        // If the email is already tied to another Firebase UID, block to avoid hijacking
+        if ($existing && !empty($existing['firebase_uid']) && $existing['firebase_uid'] !== $uid) {
+            http_response_code(409);
+            echo json_encode(['error' => 'Account email already linked to a different user']);
+            exit;
+        }
+    }
+
     if ($existing) {
-        // Update existing user
-        $stmt = $db->prepare('UPDATE users SET name = :name, email = :email, age = :age WHERE firebase_uid = :uid');
+        // Update existing user and attach the Firebase UID if missing
+        $stmt = $db->prepare('UPDATE users SET name = :name, email = :email, age = :age, firebase_uid = COALESCE(firebase_uid, :uid) WHERE id = :id');
         $stmt->execute([
+            ':id' => $existing['id'],
             ':uid' => $uid,
             ':name' => $name,
             ':email' => $email,

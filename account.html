@@ -24,7 +24,8 @@
         <ul>
           <li><a href="index.html">Home</a></li>
           <li><a href="favorites.html">Favorites</a></li>
-          <li><a href="profile.html" class="active">Profile</a></li>
+          <li><a href="registrations.html">My Registrations</a></li>
+          <li><a href="account.html" class="active">Profile</a></li>
           <li><a href="login.html">Logout</a></li>
         </ul>
       </nav>
@@ -52,10 +53,13 @@
             <strong>Email:</strong>
             <span id="user-email">john@example.com</span>
           </li>
-          <li><strong>Age:</strong> <span id="user-age">22</span></li>
           <li>
             <strong>Member Since:</strong>
             <span id="user-joined">January 2025</span>
+          </li>
+          <li>
+            <strong>Role:</strong>
+            <span id="user-role">User</span>
           </li>
         </ul>
 
@@ -64,19 +68,59 @@
         <button id="logout-btn" type="button">Logout</button>
       </section>
 
+      <section id="account-overview" class="stat-grid">
+        <div class="stat-card">
+          <p class="stat-label">Favorites</p>
+          <p class="stat-value" id="favorites-count">0</p>
+          <p class="stat-helper" id="favorites-helper">
+            Save events to keep track of them here.
+          </p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Registrations</p>
+          <p class="stat-value" id="registrations-count">0</p>
+          <p class="stat-helper" id="registrations-helper">
+            Sign up for events to see them here.
+          </p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Account Status</p>
+          <p class="stat-value" id="account-status">Active</p>
+          <p class="stat-helper">Manage notification and privacy settings.</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Member Since</p>
+          <p class="stat-value" id="member-since">—</p>
+          <p class="stat-helper">Thank you for being part of Event Finder!</p>
+        </div>
+      </section>
+
+      <section id="favorites-panel">
+        <div class="section-header">
+          <div>
+            <h3>Saved Favorites</h3>
+            <p>Recently saved events</p>
+          </div>
+          <a href="favorites.html" class="view-all">View all</a>
+        </div>
+        <div id="favorites-list" class="item-list">
+          <p class="placeholder">Loading your favorites...</p>
+        </div>
+      </section>
+
       <!-- REGISTERED EVENTS -->
       <section id="registered-events">
         <h3>Your Registered Events</h3>
-
+        <div class="registration-stats">
+          <span><strong>Upcoming:</strong> <span id="registered-upcoming">0</span></span>
+          <span><strong>Past:</strong> <span id="registered-past">0</span></span>
+          <span><strong>Cancelled:</strong> <span id="registered-cancelled">0</span></span>
+        </div>
         <div id="registered-events-container">
-          <!-- Example registered event card -->
-          <div class="registered-event-card">
-            <h4>Sample Registered Event</h4>
-            <p class="event-details">Location • Date • Time</p>
-            <button class="details-btn">View Details</button>
-          </div>
-
-          <!-- More cards inserted by JS -->
+          <p class="placeholder">
+            Registration history will appear here once you start signing up
+            for events.
+          </p>
         </div>
       </section>
 
